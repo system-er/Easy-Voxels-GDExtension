@@ -1,6 +1,6 @@
-# Easy-Voxels-GdExtension
+# Easy-Voxels-GDExtension
 
-an easy voxelengine c++ gdextension for godot 4.4.1    
+an easy voxelengine c++ GDExtension for godot 4.4.1    
 nothing special but functional...    
 it uses 16x16x16 chunks and face culling. there are voxels with a single texture or multitexture voxels.        
 the tileset is 32x32 + 1 pixel padding = 34x34.    

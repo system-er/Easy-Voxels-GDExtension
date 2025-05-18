@@ -6,7 +6,7 @@ the tileset is 32x32 + 1 pixel padding = 34x34.
 the gdextension creates a new Node VoxelEngine.    
 
     
-![Pic1](pic1.JPG)
+![Pic1](gdexample/pic1.JPG)
 
 
 you can use it for example in gdscript:    

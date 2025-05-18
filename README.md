@@ -33,3 +33,4 @@ update_world
 delete_voxel "global_pos"    
 get_voxel_type "global_pos"    
 get_voxel_texture "global_pos", "nr"    
+identify_voxel (with this you get the result of the voxel under the mouse in vector3i)    

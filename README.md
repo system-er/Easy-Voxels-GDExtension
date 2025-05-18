@@ -10,7 +10,7 @@ you can use is for example in gdscript:
   var ve = VoxelEngine.new()
 	
   # initialize VoxelEngine sizex, sizey, sizez, tilemap with padding, parentnode, camera3D
-  ve.InitVE(64, 32, 64, ResourceLoader.load("res://resources/textures/tilemap32.png"), self, cam)
+  ve.InitVE(64, 32, 64, ResourceLoader.load("res://resources/textures/tilemap32.png"), self, get_node("Camera3D"))
 
   # set some voxels
 	ve.set_voxel_singletexture(Vector3i(14, 2, 16), 4)

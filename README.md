@@ -38,4 +38,4 @@ identify_voxel (with this you get the result of the voxel under the mouse in vec
 
 
 # changes:
-changed identify_voxel in voxelengine.cpp and added a test in demo/src/node3d.gd    
+v0.2: changed identify_voxel in voxelengine.cpp and added a test in demo/src/node3d.gd    

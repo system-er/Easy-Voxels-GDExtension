@@ -40,6 +40,7 @@ void VoxelEngine::InitVE(int size_x, int size_y, int size_z,
     camera = memnew(Camera3D);
     parent = parentnode;
     camera = cameranode;
+    UtilityFunctions::print("parent:", parent, " camera:", camera);
 }
 
 
@@ -171,7 +172,6 @@ void VoxelEngine::delete_voxel(const Vector3i& global_pos) {
     }
 }
 
-
 Voxel* VoxelEngine::get_voxel(const Vector3i& global_pos) const {
     if (!is_in_world(global_pos)) {
         return new SingleTextureVoxel(0);
@@ -192,13 +192,29 @@ Voxel* VoxelEngine::get_voxel(const Vector3i& global_pos) const {
     if (local_pos.y < 0) local_pos.y += CHUNK_SIZE;
     if (local_pos.z < 0) local_pos.z += CHUNK_SIZE;
 
-    size_t index = get_chunk_index(chunk_pos);
-    if (index < chunks.size() && chunks[index]) {
-        return chunks[index]->get_voxel(local_pos);
+    int chunks_x = (WORLD_SIZE_X + CHUNK_SIZE - 1) / CHUNK_SIZE;
+    int chunks_y = (WORLD_SIZE_Y + CHUNK_SIZE - 1) / CHUNK_SIZE;
+    int chunks_z = (WORLD_SIZE_Z + CHUNK_SIZE - 1) / CHUNK_SIZE;
+
+    if (chunk_pos.x < 0 || chunk_pos.x >= chunks_x ||
+        chunk_pos.y < 0 || chunk_pos.y >= chunks_y ||
+        chunk_pos.z < 0 || chunk_pos.z >= chunks_z) {
+        return new SingleTextureVoxel(0);
     }
 
-    return new SingleTextureVoxel(0);
+    size_t index = get_chunk_index(chunk_pos);
+    if (index >= chunks.size() || !chunks[index]) {
+        return new SingleTextureVoxel(0);
+    }
+
+    Voxel* voxel = chunks[index]->get_voxel(local_pos);
+    if (!voxel) {
+        return new SingleTextureVoxel(0);
+    }
+
+    return voxel;
 }
+
 
 int VoxelEngine::get_voxel_type(const Vector3i& global_pos) const {
     if (!is_in_world(global_pos)) {
@@ -331,79 +347,82 @@ void VoxelEngine::update_neighbor_chunks(const Vector3i& chunk_pos, const Vector
 }
 
 
+Ref<Texture2D> VoxelEngine::get_tilemap() const {
+    return tilemap;
+}
 
 godot::Vector3i VoxelEngine::identify_voxel() const {
-    
-    Vector2 mouse_pos = parent->get_viewport()->get_mouse_position();
+    if(!camera) return Vector3i(-1, -1, -1);
 
-    Vector3 ray_origin = camera->project_ray_origin(mouse_pos);
-    Vector3 ray_normal = camera->project_ray_normal(mouse_pos);
+    // Ray Setup
+    godot::Viewport* viewport = camera->get_viewport();
+    godot::Vector2 mouse_pos = viewport->get_mouse_position();
+    godot::Vector3 ray_origin = camera->project_ray_origin(mouse_pos);
+    godot::Vector3 ray_normal = camera->project_ray_normal(mouse_pos);
 
+    // Ray Offset
     ray_origin += ray_normal * 0.05f;
 
-    Vector3i voxel_pos(
-        (int)std::floor(ray_origin.x),
-        (int)std::floor(ray_origin.y),
-        (int)std::floor(ray_origin.z)
+    // Initial Voxel Position
+    godot::Vector3i voxel_pos(
+        static_cast<int>(std::floor(ray_origin.x)),
+        static_cast<int>(std::floor(ray_origin.y)),
+        static_cast<int>(std::floor(ray_origin.z))
     );
 
-    Vector3i step(
-        ray_normal.x > 0 ? 1 : (ray_normal.x < 0 ? -1 : 0),
-        ray_normal.y > 0 ? 1 : (ray_normal.y < 0 ? -1 : 0),
-        ray_normal.z > 0 ? 1 : (ray_normal.z < 0 ? -1 : 0)
+    // Step Direction
+    godot::Vector3i step(
+        (ray_normal.x > 0) ? 1 : (ray_normal.x < 0 ? -1 : 0),
+        (ray_normal.y > 0) ? 1 : (ray_normal.y < 0 ? -1 : 0),
+        (ray_normal.z > 0) ? 1 : (ray_normal.z < 0 ? -1 : 0)
     );
 
-    Vector3 t_delta(
-        ray_normal.x != 0 ? 1.0f / std::abs(ray_normal.x) : std::numeric_limits<float>::max(),
-        ray_normal.y != 0 ? 1.0f / std::abs(ray_normal.y) : std::numeric_limits<float>::max(),
-        ray_normal.z != 0 ? 1.0f / std::abs(ray_normal.z) : std::numeric_limits<float>::max()
+    // T Delta Calculations
+    godot::Vector3 t_delta(
+        (ray_normal.x != 0) ? 1.0f / std::abs(ray_normal.x) : FLT_MAX,
+        (ray_normal.y != 0) ? 1.0f / std::abs(ray_normal.y) : FLT_MAX,
+        (ray_normal.z != 0) ? 1.0f / std::abs(ray_normal.z) : FLT_MAX
     );
 
-    Vector3 t_max(
-        ray_normal.x != 0 ? ((voxel_pos.x + (ray_normal.x > 0 ? 1 : 0)) - ray_origin.x) / ray_normal.x : std::numeric_limits<float>::max(),
-        ray_normal.y != 0 ? ((voxel_pos.y + (ray_normal.y > 0 ? 1 : 0)) - ray_origin.y) / ray_normal.y : std::numeric_limits<float>::max(),
-        ray_normal.z != 0 ? ((voxel_pos.z + (ray_normal.z > 0 ? 1 : 0)) - ray_origin.z) / ray_normal.z : std::numeric_limits<float>::max()
+    // T Max Initialization
+    godot::Vector3 t_max(
+        (ray_normal.x != 0) ? ((voxel_pos.x + (ray_normal.x > 0 ? 1 : 0)) - ray_origin.x) / ray_normal.x : FLT_MAX,
+        (ray_normal.y != 0) ? ((voxel_pos.y + (ray_normal.y > 0 ? 1 : 0)) - ray_origin.y) / ray_normal.y : FLT_MAX,
+        (ray_normal.z != 0) ? ((voxel_pos.z + (ray_normal.z > 0 ? 1 : 0)) - ray_origin.z) / ray_normal.z : FLT_MAX
     );
 
-    int max_steps = 1000;
-    for (int i = 0; i < max_steps; i++) {
-        if (!is_in_world(voxel_pos))
-            return voxel_pos;
+    constexpr int MAX_STEPS = 1000;
+    for(int i = 0; i < MAX_STEPS; ++i) {
+        if(!is_in_world(voxel_pos)) break;
 
         Voxel* voxel = get_voxel(voxel_pos);
-        if (voxel->is_active()) {
-            Vector3i prev_voxel_pos = voxel_pos - step;
-            if (is_in_world(prev_voxel_pos)) {
-                Voxel* prev_voxel = get_voxel(prev_voxel_pos);
-                if (prev_voxel->is_active()) {
-                    delete voxel;
-                    voxel_pos = prev_voxel_pos;
-                    voxel = prev_voxel;
-                } else {
-                    delete prev_voxel;
+        if(voxel && voxel->is_active()) {
+            // Backtrack check
+            godot::Vector3i prev_pos = voxel_pos - step;
+            if(is_in_world(prev_pos)) {
+                Voxel* prev_voxel = get_voxel(prev_pos);
+                if(prev_voxel && prev_voxel->is_active()) {
+                    return voxel_pos-step;
                 }
             }
             return voxel_pos;
         }
-        delete voxel;
 
-        if (t_max.x < t_max.y && t_max.x < t_max.z) {
+        // Traversal logic
+        if(t_max.x < t_max.y && t_max.x < t_max.z) {
             voxel_pos.x += step.x;
             t_max.x += t_delta.x;
-        } else if (t_max.y < t_max.z) {
+        } 
+        else if(t_max.y < t_max.z) {
             voxel_pos.y += step.y;
             t_max.y += t_delta.y;
-        } else {
+        } 
+        else {
             voxel_pos.z += step.z;
             t_max.z += t_delta.z;
         }
     }
     return voxel_pos;
-}
-
-
-Ref<Texture2D> VoxelEngine::get_tilemap() const {
-    return tilemap;
 }
 
 void VoxelEngine::_bind_methods() {

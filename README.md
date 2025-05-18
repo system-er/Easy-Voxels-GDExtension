@@ -6,7 +6,7 @@ the tileset is 32x32 + 1 pixel padding = 34x34.
 the gdextension creates a new Node VoxelEngine.    
 for build with scons fill godot-cpp version 4.4.1 into directory godot-cpp    
 for use of the binaries put into bin-directory.     
-to test the demo create a bin-directory in demo and put the binaries there.         
+      
     
 ![Pic1](gdexample/pic1.jpg)
 

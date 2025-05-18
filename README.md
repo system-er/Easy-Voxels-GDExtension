@@ -34,4 +34,8 @@ update_world
 delete_voxel "global_pos"    
 get_voxel_type "global_pos"    
 get_voxel_texture "global_pos", "nr"    
-identify_voxel (with this you get the result of the voxel under the mouse in vector3i, seems buggy i will search...)    
+identify_voxel (with this you get the result of the voxel under the mouse in vector3i)    
+
+
+# changes:
+changed identify_voxel in voxelengine.cpp and added a test in demo/src/node3d.gd    

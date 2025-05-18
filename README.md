@@ -9,7 +9,7 @@ the gdextension creates a new Node VoxelEngine.
 ![Pic1](pic1.JPG)
 
 
-you can use is for example in gdscript:    
+you can use it for example in gdscript:    
 ```
   # instantiate class VoxelEngine
   var ve = VoxelEngine.new()

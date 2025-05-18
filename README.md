@@ -16,7 +16,7 @@ you can use it for example in gdscript:
   # instantiate class VoxelEngine
   var ve = VoxelEngine.new()
 	
-  # initialize VoxelEngine sizex, sizey, sizez, tilemap with padding, parentnode, camera3D
+  # initialize VoxelEngine sizex, sizey, sizez(set to 64,32,64 only for demo its your decision), tilemap with padding, parentnode, camera3D
   ve.InitVE(64, 32, 64, ResourceLoader.load("res://resources/textures/tilemap32.png"), self, get_node("Camera3D"))
 
   # set some voxels

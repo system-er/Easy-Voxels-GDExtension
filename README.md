@@ -27,8 +27,7 @@ you can use it for example in gdscript:
 
 # the methods with parameters:    
 InitVE "size_x", "size_y", "size_z", "tex", "parentnode"    
-set_voxel_singletexture "global_pos", "textureid"     
-set_voxel_singletexture "global_pos", "textureid"    
+set_voxel_singletexture "global_pos", "textureid"       
 set_voxel_multitexture "global_pos",  "right", "left", "up", "down", "forward", "back"     
 update_world    
 delete_voxel "global_pos"    

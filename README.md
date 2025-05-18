@@ -4,7 +4,7 @@ an easy cube voxelengine c++ GDExtension for godot 4.4.1. nothing special but fu
 it uses 16x16x16 chunks and face culling. there are voxels with a single texture or multitexture voxels.        
 the tileset is 32x32 + 1 pixel padding (leave 1 pixel seam around every texture) = 34x34.    
 the gdextension creates a new Node VoxelEngine.    
-for build with scons fill godot-cpp version 4.4.1 into directory godot-cpp    
+for build with scons copy godot-cpp version 4.4.1 into directory godot-cpp    
 for use of the binaries put into bin-directory.     
       
     

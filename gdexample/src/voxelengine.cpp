@@ -418,5 +418,6 @@ void VoxelEngine::_bind_methods() {
     ClassDB::bind_method(D_METHOD("delete_voxel", "global_pos"), &VoxelEngine::delete_voxel);
     ClassDB::bind_method(D_METHOD("get_voxel_type", "global_pos"), &VoxelEngine::get_voxel_type);
     ClassDB::bind_method(D_METHOD("get_voxel_texture", "global_pos", "nr"), &VoxelEngine::get_voxel_texture);
+    ClassDB::bind_method(D_METHOD("identify_voxel"), &VoxelEngine::identify_voxel);
 }
 

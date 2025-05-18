@@ -13,8 +13,8 @@ you can use is for example in gdscript:
   ve.InitVE(64, 32, 64, ResourceLoader.load("res://resources/textures/tilemap32.png"), self, get_node("Camera3D"))
 
   # set some voxels
-	ve.set_voxel_singletexture(Vector3i(14, 2, 16), 4)
-	ve.set_voxel_multitexture(Vector3i(16, 2, 16), 2, 3, 4, 5, 6, 7)
-```
+  ve.set_voxel_singletexture(Vector3i(14, 2, 16), 4)
+  ve.set_voxel_multitexture(Vector3i(16, 2, 16), 2, 3, 4, 5, 6, 7)
 
-	ve.update_world()	
+  ve.update_world()
+```

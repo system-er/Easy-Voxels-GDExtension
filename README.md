@@ -1,9 +1,14 @@
 # Easy-Voxels-GdExtension
 
 an very easy voxelengine c++ gdextension for godot 4.4.1    
-it uses 16x16x16 chunks and face culling.    
+it uses 16x16x16 chunks and face culling. there are voxels with a single texture or multitexture voxels.        
 the tileset is 32x32 + 1 pixel padding = 34x34.    
 the gdextension creates a new Node VoxelEngine.    
+
+    
+![Pic1](pic1.JPG)
+
+
 you can use is for example in gdscript:    
 ```
   # instantiate class VoxelEngine
@@ -18,3 +23,13 @@ you can use is for example in gdscript:
 
   ve.update_world()
 ```
+
+# the methods with parameters:    
+InitVE "size_x", "size_y", "size_z", "tex", "parentnode"    
+set_voxel_singletexture "global_pos", "textureid"     
+set_voxel_singletexture "global_pos", "textureid"    
+set_voxel_multitexture "global_pos",  "right", "left", "up", "down", "forward", "back"     
+update_world    
+delete_voxel "global_pos"    
+get_voxel_type "global_pos"    
+get_voxel_texture "global_pos", "nr"    

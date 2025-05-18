@@ -1,15 +1,17 @@
 extends Node3D
 
 
+var ve: VoxelEngine
 var cam: Camera3D
-
+var mtimer: float = 0.0
+const MINTERVAL: float = 0.5
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	cam = get_node("Camera3D")
 	
 	# instantiate class VoxelEngine
-	var ve = VoxelEngine.new()
+	ve = VoxelEngine.new()
 	
 	# initialize VoxelEngine sizex, sizey, sizez, tilemap with padding, parentnode, camera3D
 	ve.InitVE(64, 32, 64, ResourceLoader.load("res://resources/textures/tilemap32.png"), self, cam)
@@ -46,7 +48,13 @@ func _ready() -> void:
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta: float) -> void:
+func _process(delta: float) -> void:
 	#pass
+	var voxelresult : Vector3i
+	mtimer += delta
+	if mtimer >= MINTERVAL:
+		voxelresult = ve.identify_voxel()
+		print("voxel under mouse:", voxelresult)
+		mtimer = 0.0
 
 	

@@ -4,7 +4,9 @@ extends Node3D
 var ve: VoxelEngine
 var cam: Camera3D
 var mtimer: float = 0.0
+var voxeloldpos: Vector3i = Vector3i(-1, -1, -1)
 const MINTERVAL: float = 0.5
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -14,7 +16,7 @@ func _ready() -> void:
 	ve = VoxelEngine.new()
 	
 	# initialize VoxelEngine sizex, sizey, sizez, tilemap with padding, parentnode, camera3D
-	ve.InitVE(64, 32, 64, ResourceLoader.load("res://resources/textures/tilemap32.png"), self, cam)
+	ve.InitVE(256, 32, 256, ResourceLoader.load("res://resources/textures/tilemap32.png"), self, cam)
 	
 	# set some voxels
 	for x in range(32):
@@ -41,6 +43,8 @@ func _ready() -> void:
 	print("voxeltype:", voxeltype)
 	var voxeltexture = ve.get_voxel_texture(Vector3i(1, 1, 1), 0)
 	print("voxeltexture:", voxeltexture)
+	#var testvoxel: Voxel
+
 	# test delete_voxel
 	ve.delete_voxel(Vector3i(1, 1, 1));
 	ve.update_world()
@@ -54,7 +58,9 @@ func _process(delta: float) -> void:
 	mtimer += delta
 	if mtimer >= MINTERVAL:
 		voxelresult = ve.identify_voxel()
-		print("voxel under mouse:", voxelresult)
-		mtimer = 0.0
+		if voxelresult != voxeloldpos:
+			print("voxelresult:", voxelresult)
+			voxeloldpos = voxelresult
+			mtimer = 0.0
 
 	

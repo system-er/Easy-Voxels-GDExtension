@@ -5,7 +5,7 @@ var ve: VoxelEngine
 var cam: Camera3D
 var mtimer: float = 0.0
 var voxeloldpos: Vector3i = Vector3i(-1, -1, -1)
-const MINTERVAL: float = 0.5
+const MINTERVAL: float = 0.3
 
 
 # Called when the node enters the scene tree for the first time.
@@ -43,7 +43,6 @@ func _ready() -> void:
 	print("voxeltype:", voxeltype)
 	var voxeltexture = ve.get_voxel_texture(Vector3i(1, 1, 1), 0)
 	print("voxeltexture:", voxeltexture)
-	#var testvoxel: Voxel
 
 	# test delete_voxel
 	ve.delete_voxel(Vector3i(1, 1, 1));
@@ -60,6 +59,7 @@ func _process(delta: float) -> void:
 		voxelresult = ve.identify_voxel()
 		if voxelresult != voxeloldpos:
 			print("voxelresult:", voxelresult)
+			ve.delete_voxel(voxelresult)
 			voxeloldpos = voxelresult
 			mtimer = 0.0
 

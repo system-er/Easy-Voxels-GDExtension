@@ -220,7 +220,7 @@ int Chunk::add_cube(Ref<SurfaceTool> st, const Vector3& pos, Voxel* voxel) {
 
 int Chunk::add_face(Ref<SurfaceTool> st, godot::Vector3 pos, const Vector3& normal, uint8_t texture_id,
                     float tile_u, float tile_v, float tile_size_u, float tile_size_v, float uv_offset) {
-    texture_id++;
+    //texture_id++;
     Ref<Texture2D> tilemap = voxel_engine->get_tilemap();
     int tiles_per_row = tilemap->get_width() / 34;
     float padding_u = 1.0f / tilemap->get_width();

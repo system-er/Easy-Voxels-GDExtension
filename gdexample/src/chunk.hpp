@@ -10,7 +10,7 @@
 
 class VoxelEngine;
 
-// Hash-Funktor für Vector3i
+
 namespace godot {
     struct Vector3iHasher {
         std::size_t operator()(const Vector3i& v) const {
@@ -55,7 +55,7 @@ private:
     int add_face(godot::Ref<godot::SurfaceTool> st, godot::Vector3 pos, const godot::Vector3& normal, uint8_t texture_id,
                  float tile_u, float tile_v, float tile_size_u, float tile_size_v, float uv_offset);
 
-    // Helper to convert 3D coordinates to 1D index
+
     inline size_t get_index(int x, int y, int z) const {
         return x * CHUNK_SIZE * CHUNK_SIZE + y * CHUNK_SIZE + z;
     }

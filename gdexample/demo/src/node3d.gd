@@ -19,8 +19,8 @@ func _ready() -> void:
 	ve.InitVE(256, 32, 256, ResourceLoader.load("res://resources/textures/tilemap32.png"), self, cam)
 	
 	# set some voxels
-	for x in range(32):
-		for z in range(32):
+	for x in range(64):
+		for z in range(64):
 			ve.set_voxel_singletexture(Vector3i(x, 0, z), 2)
 	for x in range(8):
 		for z in range(8):
@@ -29,6 +29,10 @@ func _ready() -> void:
 	ve.set_voxel_multitexture(Vector3i(16, 2, 16), 2, 3, 4, 5, 6, 7)
 	ve.set_voxel_multitexture(Vector3i(18, 2, 16), 7, 8, 10, 7, 8, 13)
 	ve.set_voxel_multitexture(Vector3i(18, 5, 16), 3, 4, 5, 6, 7, 8)
+	
+	var start = Vector3i(32, 0, 32)
+	var end = Vector3i(48, 2, 48)
+	ve.fill_voxel_region(start, end, 1, 5) 
 	
 	var start_timestamp = Time.get_unix_time_from_system()
 	# create the meshes of the chunks and see the world
@@ -59,7 +63,7 @@ func _process(delta: float) -> void:
 		voxelresult = ve.identify_voxel()
 		if voxelresult != voxeloldpos:
 			print("voxelresult:", voxelresult)
-			ve.delete_voxel(voxelresult)
+			#ve.delete_voxel(voxelresult)
 			voxeloldpos = voxelresult
 			mtimer = 0.0
 

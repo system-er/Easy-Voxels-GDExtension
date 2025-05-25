@@ -55,35 +55,24 @@ void Chunk::init() {
 
 }
 
-/*
-void Chunk::set_voxel(const Vector3i& local_pos, Voxel* voxel) {
-    if (is_in_bounds(local_pos)) {
-        size_t index = get_index(local_pos.x, local_pos.y, local_pos.z);
-        delete voxels[index];
-        voxels[index] = voxel;
-        needs_mesh_update = true;
-    }
-}
-*/
+
 void Chunk::set_voxel(const Vector3i& local_pos, Voxel* voxel) {
     if (!is_in_bounds(local_pos)) {
         delete voxel;
         return;
     }
 
-    // Entferne existierenden Voxel, falls vorhanden
     auto it = voxels.find(local_pos);
     if (it != voxels.end()) {
         delete it->second;
         voxels.erase(it);
     }
 
-    // Füge neuen Voxel hinzu, nur wenn er aktiv ist
     if (voxel && voxel->is_active()) {
         voxels[local_pos] = voxel;
         needs_mesh_update = true;
     } else {
-        delete voxel; // Lösche Voxel, wenn inaktiv
+        delete voxel;
     }
 }
 
@@ -95,14 +84,7 @@ void Chunk::update_mesh() {
     }
 }
 
-/*
-Voxel* Chunk::get_voxel(const Vector3i& local_pos) const {
-    if (is_in_bounds(local_pos)) {
-        return voxels[get_index(local_pos.x, local_pos.y, local_pos.z)];
-    }
-    return new SingleTextureVoxel(0);
-}
-*/
+
 Voxel* Chunk::get_voxel(const Vector3i& local_pos) const {
     if (!is_in_bounds(local_pos)) {
         return new SingleTextureVoxel(0);
@@ -114,36 +96,12 @@ Voxel* Chunk::get_voxel(const Vector3i& local_pos) const {
     return new SingleTextureVoxel(0);
 }
 
-/*
+
 void Chunk::generate_mesh() {
     Ref<SurfaceTool> surface_tool = Ref<SurfaceTool>(memnew(SurfaceTool));
     surface_tool->begin(Mesh::PRIMITIVE_TRIANGLES);
     int triangle_count = 0;
 
-    for (int x = 0; x < CHUNK_SIZE; x++) {
-        for (int y = 0; y < CHUNK_SIZE; y++) {
-            for (int z = 0; z < CHUNK_SIZE; z++) {
-                Voxel* voxel = voxels[get_index(x, y, z)];
-                if (!voxel->is_active()) continue;
-
-                Vector3 pos(x, y, z);
-                triangle_count += add_cube(surface_tool, pos, voxel);
-            }
-        }
-    }
-
-    Ref<ArrayMesh> mesh = surface_tool->commit();
-    mesh_instance->set_mesh(mesh);
-    mesh_instance->set_material_override(sm3d);
-    //UtilityFunctions::print("GenerateMesh trianglecount:", triangle_count);
-}
-*/
-void Chunk::generate_mesh() {
-    Ref<SurfaceTool> surface_tool = Ref<SurfaceTool>(memnew(SurfaceTool));
-    surface_tool->begin(Mesh::PRIMITIVE_TRIANGLES);
-    int triangle_count = 0;
-
-    // Iteriere nur über gespeicherte (aktive) Voxel
     for (const auto& pair : voxels) {
         Vector3i local_pos = pair.first;
         Voxel* voxel = pair.second;
@@ -166,19 +124,7 @@ bool Chunk::is_in_bounds(const Vector3i& pos) const {
            pos.z >= 0 && pos.z < CHUNK_SIZE;
 }
 
-/*
-bool Chunk::is_voxel_active(const Vector3i& pos) const {
-    Vector3i global_pos = chunk_position * CHUNK_SIZE + pos;
-    if (!voxel_engine) {
-        UtilityFunctions::printerr("IsVoxelActive (Chunk at ", chunk_position, "): voxelEngine is null! Returning false.");
-        return false;
-    }
-    Voxel* voxel = voxel_engine->get_voxel(global_pos);
-    bool active = voxel->is_active();
-    //delete voxel;
-    return active;
-}
-*/
+
 bool Chunk::is_voxel_active(const Vector3i& pos) const {
     if (!is_in_bounds(pos)) {
         return false;
@@ -187,25 +133,7 @@ bool Chunk::is_voxel_active(const Vector3i& pos) const {
     return it != voxels.end() && it->second->is_active();
 }
 
-/*
-bool Chunk::is_neighbor_active(const Vector3i& neighbor_pos) const {
-    if (is_in_bounds(neighbor_pos)) {
-        return get_voxel(neighbor_pos)->is_active();
-    }
 
-    Vector3i global_pos = chunk_position * CHUNK_SIZE + neighbor_pos;
-    if (global_pos.x < 0 || global_pos.x >= VoxelEngine::WORLD_SIZE_X ||
-        global_pos.y < 0 || global_pos.y >= VoxelEngine::WORLD_SIZE_Y ||
-        global_pos.z < 0 || global_pos.z >= VoxelEngine::WORLD_SIZE_Z) {
-        return false;
-    }
-
-    Voxel* voxel = voxel_engine->get_voxel(global_pos);
-    bool active = voxel->is_active();
-    delete voxel;
-    return active;
-}
-*/
 bool Chunk::is_neighbor_active(const Vector3i& neighbor_pos) const {
     if (is_in_bounds(neighbor_pos)) {
         auto it = voxels.find(neighbor_pos);

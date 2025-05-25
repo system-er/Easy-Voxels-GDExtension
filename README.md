@@ -39,14 +39,14 @@ identify_voxel (with this you get the result of the voxel under the mouse in vec
 fill_voxel_region "start", "end", "voxel_type", "texture_id", "multi_texture_ids"    
 	example:    
  ```
- # fill region SingleTextureVoxel
-	var start = Vector3i(0, 0, 0)
-	var end = Vector3i(5, 5, 5)
-	voxel_engine.fill_voxel_region(start, end, 1, 1) # with textureid 1
+# fill region SingleTextureVoxel
+var start = Vector3i(0, 0, 0)
+var end = Vector3i(5, 5, 5)
+voxel_engine.fill_voxel_region(start, end, 1, 1) # with textureid 1
 
-	# fill region MultiTextureVoxel
-	var multi_textures = PackedByteArray([1, 2, 3, 4, 5, 6]) # textures right, left, up, down, forward, back
-	voxel_engine.fill_voxel_region(start, end, 2, 0, multi_textures)
+# fill region MultiTextureVoxel
+var multi_textures = PackedByteArray([1, 2, 3, 4, 5, 6]) # textures right, left, up, down, forward, back
+voxel_engine.fill_voxel_region(start, end, 2, 0, multi_textures)
 ```
 
 # changes:

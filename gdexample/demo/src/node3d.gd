@@ -38,7 +38,8 @@ func _ready() -> void:
 	# create the meshes of the chunks and see the world
 	ve.update_world()
 	var stop_timestamp = Time.get_unix_time_from_system()
-	print("update_world milliseconds:", (stop_timestamp-start_timestamp)*1000)
+	var time = str((stop_timestamp-start_timestamp)*1000, 0.1).pad_decimals(2)
+	print("update_world milliseconds:", time)
 	
 	
 	ve.set_voxel_singletexture(Vector3i(1, 1, 1), 4)

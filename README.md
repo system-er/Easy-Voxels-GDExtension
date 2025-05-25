@@ -51,4 +51,4 @@ voxel_engine.fill_voxel_region(start, end, 2, 0, multi_textures)
 
 # changes:
 v0.2: changed identify_voxel in voxelengine.cpp and added a test in demo/src/node3d.gd    
-v0.3: new function fill_voxel_region.
+v0.3: new function fill_voxel_region     

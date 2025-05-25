@@ -140,7 +140,7 @@ void VoxelEngine::set_voxel_multitexture(const Vector3i& global_pos,
     chunks[index]->set_voxel(local_pos, voxel);
 }
 
-
+/*
 void VoxelEngine::delete_voxel(const Vector3i& global_pos) {
     if (!is_in_world(global_pos)) {
         UtilityFunctions::print("DeleteVoxel: ", global_pos, " is outside world bounds");
@@ -164,6 +164,38 @@ void VoxelEngine::delete_voxel(const Vector3i& global_pos) {
 
     size_t index = get_chunk_index(chunk_pos);
     if (chunks[index]) {
+        chunks[index]->set_voxel(local_pos, new SingleTextureVoxel(0));
+        chunks[index]->update_mesh();
+        update_neighbor_chunks(chunk_pos, local_pos);
+    } else {
+        UtilityFunctions::print("DeleteVoxel: No chunk found at chunk position ", chunk_pos);
+    }
+}
+*/
+void VoxelEngine::delete_voxel(const Vector3i& global_pos) {
+    if (!is_in_world(global_pos)) {
+        UtilityFunctions::print("DeleteVoxel: ", global_pos, " is outside world bounds");
+        return;
+    }
+
+    Vector3i chunk_pos(
+        global_pos.x / CHUNK_SIZE,
+        global_pos.y / CHUNK_SIZE,
+        global_pos.z / CHUNK_SIZE
+    );
+    Vector3i local_pos(
+        global_pos.x % CHUNK_SIZE,
+        global_pos.y % CHUNK_SIZE,
+        global_pos.z % CHUNK_SIZE
+    );
+
+    if (local_pos.x < 0) local_pos.x += CHUNK_SIZE;
+    if (local_pos.y < 0) local_pos.y += CHUNK_SIZE;
+    if (local_pos.z < 0) local_pos.z += CHUNK_SIZE;
+
+    size_t index = get_chunk_index(chunk_pos);
+    if (chunks[index]) {
+        // Setze einen inaktiven Voxel (wird in set_voxel entfernt)
         chunks[index]->set_voxel(local_pos, new SingleTextureVoxel(0));
         chunks[index]->update_mesh();
         update_neighbor_chunks(chunk_pos, local_pos);
@@ -425,7 +457,7 @@ godot::Vector3i VoxelEngine::identify_voxel() const {
     return voxel_pos;
 }
 
-
+/*
 void VoxelEngine::fill_voxel_region(const godot::Vector3i& start, const godot::Vector3i& end, int voxel_type, uint8_t texture_id, const godot::PackedByteArray& multi_texture_ids) {
     // Validierung der Parameter
     if (voxel_type != 1 && voxel_type != 2) {
@@ -579,7 +611,160 @@ void VoxelEngine::fill_voxel_region(const godot::Vector3i& start, const godot::V
         }
     }
 }
+*/
+void VoxelEngine::fill_voxel_region(const godot::Vector3i& start, const godot::Vector3i& end, int voxel_type, uint8_t texture_id, const godot::PackedByteArray& multi_texture_ids) {
+    // Validierung der Parameter
+    if (voxel_type != 1 && voxel_type != 2) {
+        UtilityFunctions::printerr("FillVoxelRegion: Invalid voxel_type! Must be 1 (SingleTextureVoxel) or 2 (MultiTextureVoxel).");
+        return;
+    }
+    if (voxel_type == 2 && multi_texture_ids.size() != 6) {
+        UtilityFunctions::printerr("FillVoxelRegion: MultiTextureVoxel requires exactly 6 texture IDs!");
+        return;
+    }
 
+    // Normalisiere Start- und Endpunkte (start <= end)
+    Vector3i min_pos(
+        std::min(start.x, end.x),
+        std::min(start.y, end.y),
+        std::min(start.z, end.z)
+    );
+    Vector3i max_pos(
+        std::max(start.x, end.x),
+        std::max(start.y, end.y),
+        std::max(start.z, end.z)
+    );
+
+    // Prüfe, ob der Bereich innerhalb der Weltgrenzen liegt
+    if (!is_in_world(min_pos) || !is_in_world(max_pos)) {
+        UtilityFunctions::printerr("FillVoxelRegion: Region is outside world bounds!");
+        return;
+    }
+
+    // Berechne die Chunk-Positionen für Start- und Endpunkte
+    Vector3i start_chunk(
+        min_pos.x / CHUNK_SIZE,
+        min_pos.y / CHUNK_SIZE,
+        min_pos.z / CHUNK_SIZE
+    );
+    Vector3i end_chunk(
+        max_pos.x / CHUNK_SIZE,
+        max_pos.y / CHUNK_SIZE,
+        max_pos.z / CHUNK_SIZE
+    );
+
+    // Prüfe, ob der Bereich vollständig in einem Chunk liegt
+    if (start_chunk == end_chunk) {
+        // Bereich liegt in einem einzigen Chunk
+        size_t chunk_index = get_chunk_index(start_chunk);
+        if (!chunks[chunk_index]) {
+            chunks[chunk_index] = memnew(Chunk(this, start_chunk));
+            parent->add_child(chunks[chunk_index]);
+            chunks[chunk_index]->set_position(start_chunk * CHUNK_SIZE);
+            chunks[chunk_index]->init();
+        }
+
+        // Lokale Koordinaten innerhalb des Chunks
+        Vector3i local_start(
+            min_pos.x % CHUNK_SIZE,
+            min_pos.y % CHUNK_SIZE,
+            min_pos.z % CHUNK_SIZE
+        );
+        Vector3i local_end(
+            max_pos.x % CHUNK_SIZE,
+            max_pos.y % CHUNK_SIZE,
+            max_pos.z % CHUNK_SIZE
+        );
+        if (local_start.x < 0) local_start.x += CHUNK_SIZE;
+        if (local_start.y < 0) local_start.y += CHUNK_SIZE;
+        if (local_start.z < 0) local_start.z += CHUNK_SIZE;
+        if (local_end.x < 0) local_end.x += CHUNK_SIZE;
+        if (local_end.y < 0) local_end.y += CHUNK_SIZE;
+        if (local_end.z < 0) local_end.z += CHUNK_SIZE;
+
+        // Fülle den Bereich im Chunk
+        for (int x = local_start.x; x <= local_end.x; ++x) {
+            for (int y = local_start.y; y <= local_end.y; ++y) {
+                for (int z = local_start.z; z <= local_end.z; ++z) {
+                    Voxel* voxel = nullptr;
+                    if (voxel_type == 1) {
+                        voxel = new SingleTextureVoxel(texture_id);
+                    } else if (voxel_type == 2) {
+                        voxel = new MultiTextureVoxel(
+                            multi_texture_ids[0], multi_texture_ids[1], multi_texture_ids[2],
+                            multi_texture_ids[3], multi_texture_ids[4], multi_texture_ids[5]
+                        );
+                    }
+                    chunks[chunk_index]->set_voxel(Vector3i(x, y, z), voxel);
+                }
+            }
+        }
+        chunks[chunk_index]->update_mesh();
+        update_neighbor_chunks(start_chunk, local_start);
+        update_neighbor_chunks(start_chunk, local_end);
+    } else {
+        // Bereich überspannt mehrere Chunks
+        int chunks_x = (WORLD_SIZE_X + CHUNK_SIZE - 1) / CHUNK_SIZE;
+        int chunks_y = (WORLD_SIZE_Y + CHUNK_SIZE - 1) / CHUNK_SIZE;
+        int chunks_z = (WORLD_SIZE_Z + CHUNK_SIZE - 1) / CHUNK_SIZE;
+
+        for (int cx = start_chunk.x; cx <= end_chunk.x; ++cx) {
+            for (int cy = start_chunk.y; cy <= end_chunk.y; ++cy) {
+                for (int cz = start_chunk.z; cz <= end_chunk.z; ++cz) {
+                    Vector3i chunk_pos(cx, cy, cz);
+                    size_t chunk_index = get_chunk_index(chunk_pos);
+
+                    // Erstelle Chunk, wenn nicht vorhanden
+                    if (!chunks[chunk_index]) {
+                        chunks[chunk_index] = memnew(Chunk(this, chunk_pos));
+                        parent->add_child(chunks[chunk_index]);
+                        chunks[chunk_index]->set_position(chunk_pos * CHUNK_SIZE);
+                        chunks[chunk_index]->init();
+                    }
+
+                    // Bestimme lokale Grenzen für diesen Chunk
+                    Vector3i local_start(
+                        cx == start_chunk.x ? min_pos.x % CHUNK_SIZE : 0,
+                        cy == start_chunk.y ? min_pos.y % CHUNK_SIZE : 0,
+                        cz == start_chunk.z ? min_pos.z % CHUNK_SIZE : 0
+                    );
+                    Vector3i local_end(
+                        cx == end_chunk.x ? max_pos.x % CHUNK_SIZE : CHUNK_SIZE - 1,
+                        cy == end_chunk.y ? max_pos.y % CHUNK_SIZE : CHUNK_SIZE - 1,
+                        cz == end_chunk.z ? max_pos.z % CHUNK_SIZE : CHUNK_SIZE - 1
+                    );
+                    if (local_start.x < 0) local_start.x += CHUNK_SIZE;
+                    if (local_start.y < 0) local_start.y += CHUNK_SIZE;
+                    if (local_start.z < 0) local_start.z += CHUNK_SIZE;
+                    if (local_end.x < 0) local_end.x += CHUNK_SIZE;
+                    if (local_end.y < 0) local_end.y += CHUNK_SIZE;
+                    if (local_end.z < 0) local_end.z += CHUNK_SIZE;
+
+                    // Fülle den Bereich im aktuellen Chunk
+                    for (int x = local_start.x; x <= local_end.x; ++x) {
+                        for (int y = local_start.y; y <= local_end.y; ++y) {
+                            for (int z = local_start.z; z <= local_end.z; ++z) {
+                                Voxel* voxel = nullptr;
+                                if (voxel_type == 1) {
+                                    voxel = new SingleTextureVoxel(texture_id);
+                                } else if (voxel_type == 2) {
+                                    voxel = new MultiTextureVoxel(
+                                        multi_texture_ids[0], multi_texture_ids[1], multi_texture_ids[2],
+                                        multi_texture_ids[3], multi_texture_ids[4], multi_texture_ids[5]
+                                    );
+                                }
+                                chunks[chunk_index]->set_voxel(Vector3i(x, y, z), voxel);
+                            }
+                        }
+                    }
+                    chunks[chunk_index]->update_mesh();
+                    update_neighbor_chunks(chunk_pos, local_start);
+                    update_neighbor_chunks(chunk_pos, local_end);
+                }
+            }
+        }
+    }
+}
 
 void VoxelEngine::_bind_methods() {
     // Bind methods if needed

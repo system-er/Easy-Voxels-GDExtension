@@ -10,13 +10,27 @@
 
 class VoxelEngine;
 
+// Hash-Funktor für Vector3i
+namespace godot {
+    struct Vector3iHasher {
+        std::size_t operator()(const Vector3i& v) const {
+            std::size_t h1 = std::hash<int>{}(v.x);
+            std::size_t h2 = std::hash<int>{}(v.y);
+            std::size_t h3 = std::hash<int>{}(v.z);
+            return h1 ^ (h2 << 1) ^ (h3 << 2);
+        }
+    };
+}
+
+
 class Chunk : public godot::Node3D {
     //GDCLASS(Chunk, godot::Node3D)
 
 private:
     static const int CHUNK_SIZE = 16;
 
-    std::vector<Voxel*> voxels; // 1D array of Voxel pointers
+    //std::vector<Voxel*> voxels; // 1D array of Voxel pointers
+    std::unordered_map<godot::Vector3i, Voxel*, godot::Vector3iHasher> voxels;
     godot::Vector3i chunk_position;
     //godot::Ref<godot::MeshInstance3D> mesh_instance;
     godot::MeshInstance3D *mesh_instance; // = nullptr;

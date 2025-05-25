@@ -35,17 +35,18 @@ delete_voxel "global_pos"
 get_voxel_type "global_pos"    
 get_voxel_texture "global_pos", "nr"    
 identify_voxel (with this you get the result of the voxel under the mouse in vector3i)    
+
 fill_voxel_region "start", "end", "voxel_type", "texture_id", "multi_texture_ids"    
 	example:    
  ```
  	# fill region SingleTextureVoxel
 	var start = Vector3i(0, 0, 0)
 	var end = Vector3i(5, 5, 5)
-	voxel_engine.fill_voxel_region(start, end, 1, 1) # SingleTextureVoxel mit Texture-ID 1
+	voxel_engine.fill_voxel_region(start, end, 1, 1) # with textureid 1
 
 	# fill region MultiTextureVoxel
-	var multi_textures = PackedByteArray([1, 2, 3, 4, 5, 6]) # Texturen für right, left, up, down, forward, back
-	voxel_engine.fill_voxel_region(start, end, 2, 0, multi_textures) # MultiTextureVoxel
+	var multi_textures = PackedByteArray([1, 2, 3, 4, 5, 6]) # textures right, left, up, down, forward, back
+	voxel_engine.fill_voxel_region(start, end, 2, 0, multi_textures)
 ```
 
 # changes:

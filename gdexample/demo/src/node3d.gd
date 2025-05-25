@@ -51,8 +51,11 @@ func _ready() -> void:
 
 	# test delete_voxel
 	ve.delete_voxel(Vector3i(1, 1, 1));
+	start_timestamp = Time.get_unix_time_from_system()
 	ve.update_world()
-	
+	stop_timestamp = Time.get_unix_time_from_system()
+	time = str((stop_timestamp-start_timestamp)*1000, 0.1).pad_decimals(2)
+	print("update_world milliseconds:", time)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

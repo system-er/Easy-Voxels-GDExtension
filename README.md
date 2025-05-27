@@ -7,9 +7,10 @@ the gdextension creates a new Node VoxelEngine.
 for build with scons copy godot-cpp version 4.4.1 into directory godot-cpp    
 for use of the binaries put into bin-directory.     
       
-    
+picture from demo:        
 ![Pic1](gdexample/pic1.jpg)
 
+usage example:    
 ![Pic2](gdexample/examplediamondsquare.jpg)
 
 you can use it for example in gdscript:    

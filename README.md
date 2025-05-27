@@ -10,7 +10,7 @@ for use of the binaries put into bin-directory.
 picture from demo:        
 ![Pic1](gdexample/pic1.jpg)
 
-usage example:    
+usage example (terraintest):    
 ![Pic2](gdexample/examplediamondsquare.jpg)
 
 you can use it for example in gdscript:    

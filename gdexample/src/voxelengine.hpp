@@ -7,20 +7,12 @@
 #include "chunk.hpp"
 #include <unordered_map>
 
-// Custom hash function for godot::Vector3i
-/*
-namespace godot {
-    struct Vector3iHasher {
-        std::size_t operator()(const Vector3i& v) const {
-            // Combine the hash of x, y, and z components
-            std::size_t h1 = std::hash<int>{}(v.x);
-            std::size_t h2 = std::hash<int>{}(v.y);
-            std::size_t h3 = std::hash<int>{}(v.z);
-            return h1 ^ (h2 << 1) ^ (h3 << 2); // Simple hash combination
-        }
-    };
-}
-*/
+
+enum MeshMode {
+    MESH_CUBE,
+    MESH_MARCHING_CUBES
+};
+
 
 class VoxelEngine : public godot::Node3D {
     GDCLASS(VoxelEngine, godot::Node3D)
@@ -36,8 +28,8 @@ private:
     //std::unordered_map<godot::Vector3i, Chunk*, godot::Vector3iHasher> chunks;
     std::vector<Chunk*> chunks;
     godot::Ref<godot::Texture2D> tilemap;
+    int mesh_mode;
 
-    // Helper to convert 3D chunk position to 1D index
     inline size_t get_chunk_index(const godot::Vector3i& chunk_pos) const {
         int chunks_x = (WORLD_SIZE_X + CHUNK_SIZE - 1) / CHUNK_SIZE;
         int chunks_y = (WORLD_SIZE_Y + CHUNK_SIZE - 1) / CHUNK_SIZE;
@@ -64,11 +56,11 @@ public:
     void set_parentnode(Node3D* node);
     void update_world();
     //void set_voxel(const godot::Vector3i& global_pos, Voxel* voxel);
-    void set_voxel_singletexture(const godot::Vector3i& global_pos, uint8_t textureid);
+    void set_voxel_singletexture(const godot::Vector3i& global_pos, uint8_t textureid,float density = 0.0f);
     void set_voxel_multitexture(const godot::Vector3i& global_pos, 
-    uint8_t right, uint8_t left, uint8_t up, uint8_t down, uint8_t forward, uint8_t back);
+    uint8_t right, uint8_t left, uint8_t up, uint8_t down, uint8_t forward, uint8_t back, float density = 0.0f);
     void fill_voxel_region(const godot::Vector3i& start, const godot::Vector3i& end, int voxel_type, 
-        uint8_t texture_id, const godot::PackedByteArray& multi_texture_ids = godot::PackedByteArray());
+        uint8_t texture_id, const godot::PackedByteArray& multi_texture_ids = godot::PackedByteArray(), float density = 0.0f);
     void delete_voxel(const godot::Vector3i& global_pos);
     Voxel* get_voxel(const godot::Vector3i& global_pos) const;
     int get_voxel_type(const godot::Vector3i& global_pos) const;
@@ -76,6 +68,10 @@ public:
     godot::Ref<godot::Texture2D> get_tilemap() const;
 
     godot::Vector3i identify_voxel() const;
+
+    void set_mesh_mode(int mode);
+    int get_mesh_mode() const;
+    float get_voxel_density(const godot::Vector3i& global_pos) const;
 };
 
 #endif // VOXEL_ENGINE_HPP

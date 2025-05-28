@@ -54,11 +54,13 @@ private:
     int add_cube(godot::Ref<godot::SurfaceTool> st, const godot::Vector3& pos, Voxel* voxel);
     int add_face(godot::Ref<godot::SurfaceTool> st, godot::Vector3 pos, const godot::Vector3& normal, uint8_t texture_id,
                  float tile_u, float tile_v, float tile_size_u, float tile_size_v, float uv_offset);
-
+    int generate_marching_cubes_mesh(godot::Ref<godot::SurfaceTool> st); 
 
     inline size_t get_index(int x, int y, int z) const {
         return x * CHUNK_SIZE * CHUNK_SIZE + y * CHUNK_SIZE + z;
     }
+
+    float get_density_at_global_pos(const godot::Vector3i& global_pos) const; 
 
 protected:
     static void _bind_methods();
@@ -67,6 +69,7 @@ public:
     Chunk();
     Chunk(VoxelEngine* engine, const godot::Vector3i& chunk_pos);
     ~Chunk();
+
 
     void init();
     void set_voxel(const godot::Vector3i& local_pos, Voxel* voxel);

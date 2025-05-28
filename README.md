@@ -51,7 +51,7 @@ voxel_engine.fill_voxel_region(start, end, 1, 1) # with textureid 1
 var multi_textures = PackedByteArray([1, 2, 3, 4, 5, 6]) # textures right, left, up, down, forward, back
 voxel_engine.fill_voxel_region(start, end, 2, 0, multi_textures)
 ```
-set_mesh_mode "mode"    
+set_mesh_mode "mode" (0 for cubic, 1 for marchingcubes)    
 get_mesh_mode    
 
 # changes:

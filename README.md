@@ -51,8 +51,8 @@ voxel_engine.fill_voxel_region(start, end, 1, 1) # with textureid 1
 var multi_textures = PackedByteArray([1, 2, 3, 4, 5, 6]) # textures right, left, up, down, forward, back
 voxel_engine.fill_voxel_region(start, end, 2, 0, multi_textures)
 ```
-set_mesh_mode "mode"
-get_mesh_mode
+set_mesh_mode "mode"    
+get_mesh_mode    
 
 # changes:
 v0.2: changed identify_voxel in voxelengine.cpp and added a test in demo/src/node3d.gd    

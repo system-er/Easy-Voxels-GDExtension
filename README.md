@@ -1,7 +1,8 @@
 # Easy-Voxels-GDExtension
 
 an easy cube voxelengine c++ GDExtension for godot 4.4.1. nothing special but functional.    
-it uses 16x16x16 chunks and face culling. there are voxels with a single texture or multitexture voxels.        
+it uses 16x16x16 chunks and face culling. there are voxels with a single texture or multitexture voxels.   
+you can choose mode 0 for cubic voxels, or mode 1 for marchingcube voxels.    
 the tileset is 32x32 + 1 pixel padding (leave 1 pixel seam around every texture) = 34x34.    
 the gdextension creates a new Node VoxelEngine.    
 for build with scons copy godot-cpp version 4.4.1 into directory godot-cpp    
@@ -50,7 +51,11 @@ voxel_engine.fill_voxel_region(start, end, 1, 1) # with textureid 1
 var multi_textures = PackedByteArray([1, 2, 3, 4, 5, 6]) # textures right, left, up, down, forward, back
 voxel_engine.fill_voxel_region(start, end, 2, 0, multi_textures)
 ```
+set_mesh_mode "mode"
+get_mesh_mode
 
 # changes:
 v0.2: changed identify_voxel in voxelengine.cpp and added a test in demo/src/node3d.gd    
 v0.3: changed voxels from "normal" array to std::unordered_map, new function fill_voxel_region     
+v0.4: added new mode for marchingcubes voxels. set with set_mesh_mode(1). still some bugs with texture, im searching...    
+

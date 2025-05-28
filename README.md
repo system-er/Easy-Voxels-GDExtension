@@ -18,13 +18,16 @@ you can use it for example in gdscript:
 ```
   # instantiate class VoxelEngine
   var ve = VoxelEngine.new()
+
+  # set mode cubic
+  ve.set_mesh_mode(0)
 	
   # initialize VoxelEngine sizex, sizey, sizez(set to 64,32,64 only for demo its your decision), tilemap with padding, parentnode, camera3D
   ve.InitVE(64, 32, 64, ResourceLoader.load("res://resources/textures/tilemap32.png"), self, get_node("Camera3D"))
 
   # set some voxels
-  ve.set_voxel_singletexture(Vector3i(14, 2, 16), 4)
-  ve.set_voxel_multitexture(Vector3i(16, 2, 16), 2, 3, 4, 5, 6, 7)
+  ve.set_voxel_singletexture(Vector3i(14, 2, 16), 4, 1.0)
+  ve.set_voxel_multitexture(Vector3i(16, 2, 16), 2, 3, 4, 5, 6, 7, 1.0)
 
   ve.update_world()
 ```

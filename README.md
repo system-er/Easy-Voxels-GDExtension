@@ -2,7 +2,7 @@
 
 an easy voxelengine c++ GDExtension for godot 4.4.1. nothing special but functional.    
 it uses 16x16x16 chunks and face culling. there are voxels with a single texture or multitexture voxels.   
-you can choose mode 0 for cubic voxels, or mode 1 for marchingcube voxels.    
+there are 2 modes. mode 0 for cubic voxels, or mode 1 for marchingcube voxels.    
 the tileset is 32x32 + 1 pixel padding (leave 1 pixel seam around every texture) = 34x34.    
 the gdextension creates a new Node VoxelEngine.    
 for build with scons copy godot-cpp version 4.4.1 into directory godot-cpp    

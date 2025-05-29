@@ -576,8 +576,10 @@ int Chunk::generate_marching_cubes_mesh(Ref<SurfaceTool> st) {
                 
                 uint8_t texture_id = 1;
                 int texture_index = 0;
-                if (SingleTextureVoxel* simple_voxel = dynamic_cast<SingleTextureVoxel*>(voxel))
+                if (SingleTextureVoxel* simple_voxel = dynamic_cast<SingleTextureVoxel*>(voxel)){
                     texture_id = simple_voxel->texture_id - 1;
+                    //if(texture_id != 2)UtilityFunctions::print("SingleTextureVoxel texture_id: ", texture_id);
+                }
                 else if (MultiTextureVoxel* multi_voxel = dynamic_cast<MultiTextureVoxel*>(voxel))
                     texture_id = multi_voxel->texture_ids[0] - 1;
                 

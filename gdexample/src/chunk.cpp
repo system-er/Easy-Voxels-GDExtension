@@ -470,7 +470,7 @@ float Chunk::get_density_at_global_pos(const godot::Vector3i& global_pos) const 
     return 0.0f;
 }
 
-
+/*
 int Chunk::generate_marching_cubes_mesh(Ref<SurfaceTool> st) {
     if (!st.is_valid()) {
         UtilityFunctions::printerr("Marching Cubes: Invalid SurfaceTool");
@@ -589,33 +589,39 @@ int Chunk::generate_marching_cubes_mesh(Ref<SurfaceTool> st) {
 
 
                     Vector2 uvs[3];
-                    if (texture_index == 2) { // Up
-                        uvs[0] = Vector2(tile_u, tile_v + tile_size_v - uv_offset); // Bottom-left
-                        uvs[1] = Vector2(tile_u + tile_size_u - uv_offset, tile_v + tile_size_v - uv_offset); // Bottom-right
-                        uvs[2] = Vector2(tile_u + tile_size_u - uv_offset, tile_v + uv_offset); // Top-right
-                    } else if (texture_index == 3) { // Down
-                        uvs[0] = Vector2(tile_u + tile_size_u - uv_offset, tile_v + uv_offset); // Bottom-left
-                        uvs[1] = Vector2(tile_u, tile_v + uv_offset); // Bottom-right
-                        uvs[2] = Vector2(tile_u, tile_v + tile_size_v - uv_offset); // Top-right
-                    } else if (texture_index == 0) { // Right
-                        uvs[0] = Vector2(tile_u + tile_size_u - uv_offset, tile_v + tile_size_v - uv_offset); // Bottom-left
-                        uvs[1] = Vector2(tile_u + tile_size_u - uv_offset, tile_v + uv_offset); // Top-left
-                        uvs[2] = Vector2(tile_u, tile_v + uv_offset); // Top-right
-                    } else if (texture_index == 1) { // Left
-                        uvs[0] = Vector2(tile_u + tile_size_u - uv_offset, tile_v + tile_size_v - uv_offset); // Bottom-right
-                        uvs[1] = Vector2(tile_u, tile_v + tile_size_v - uv_offset); // Bottom-left
-                        uvs[2] = Vector2(tile_u + tile_size_u - uv_offset, tile_v + uv_offset); // Top-right
-                    } else if (texture_index == 4) { // Forward
-                        uvs[0] = Vector2(tile_u + tile_size_u - uv_offset, tile_v + tile_size_v - uv_offset); // Bottom-right
-                        uvs[1] = Vector2(tile_u, tile_v + tile_size_v - uv_offset); // Bottom-left
-                        uvs[2] = Vector2(tile_u + tile_size_u - uv_offset, tile_v + uv_offset); // Top-right
-                    } else { // Back
-                        uvs[0] = Vector2(tile_u + tile_size_u - uv_offset, tile_v + tile_size_v - uv_offset); // Bottom-left
-                        uvs[1] = Vector2(tile_u + tile_size_u - uv_offset, tile_v + uv_offset); // Top-left
-                        uvs[2] = Vector2(tile_u, tile_v + uv_offset); // Top-right
+
+
+                    Vector3 abs_normal = face_normal.abs();
+
+                    Vector3 u_axis, v_axis;
+                    if (abs_normal.x > abs_normal.y && abs_normal.x > abs_normal.z) {
+                        u_axis = Vector3(0, 0, 1) * (face_normal.x > 0 ? 1 : -1);
+                        v_axis = Vector3(0, 1, 0);
+                    } else if (abs_normal.y > abs_normal.x && abs_normal.y > abs_normal.z) {
+
+                        u_axis = Vector3(1, 0, 0);
+                        v_axis = Vector3(0, 0, 1) * (face_normal.y > 0 ? 1 : -1);
+                    } else {
+                        u_axis = Vector3(1, 0, 0) * (face_normal.z > 0 ? 1 : -1);
+                        v_axis = Vector3(0, 1, 0);
                     }
 
-   
+                    float uv_scale_factor = 1.0f;
+
+                    for (int j = 0; j < 3; ++j) {
+                        Vector3 relative_vertex_pos = vertices[j] - Vector3(x, y, z);
+
+                        float u_coord = relative_vertex_pos.dot(u_axis) * uv_scale_factor;
+                        float v_coord = relative_vertex_pos.dot(v_axis) * uv_scale_factor;
+
+                        uvs[j] = Vector2(tile_u + u_coord * (tile_size_u - 2 * padding_u),
+                                         tile_v + v_coord * (tile_size_v - 2 * padding_v));
+
+                        uvs[j].x = std::clamp(uvs[j].x, tile_u + uv_offset, tile_u + tile_size_u - uv_offset);
+                        uvs[j].y = std::clamp(uvs[j].y, tile_v + uv_offset, tile_v + tile_size_v - uv_offset);
+                    }
+
+                    
                     Vector3 tri_center = (vertices[0] + vertices[1] + vertices[2]) / 3.0f;
                     Vector3i grid_pos = Vector3i(x, y, z) + Vector3i(
                         static_cast<int>(std::round(tri_center.x)),
@@ -683,6 +689,7 @@ int Chunk::generate_marching_cubes_mesh(Ref<SurfaceTool> st) {
 
                         if (face_normal2.dot(face_normal) > 0.9f) {
                             Vector2 uvs2[3];
+                            
                             if (texture_index == 2) { // Up
                                 uvs2[0] = Vector2(tile_u, tile_v + tile_size_v - uv_offset); // Bottom-left
                                 uvs2[1] = Vector2(tile_u, tile_v + uv_offset); // Top-left
@@ -707,6 +714,315 @@ int Chunk::generate_marching_cubes_mesh(Ref<SurfaceTool> st) {
                                 uvs2[0] = Vector2(tile_u + tile_size_u - uv_offset, tile_v + tile_size_v - uv_offset);
                                 uvs2[1] = Vector2(tile_u, tile_v + tile_size_v - uv_offset);
                                 uvs2[2] = Vector2(tile_u, tile_v + uv_offset);
+                            }
+                            
+
+                            if (face_normal2.dot(grad_normal) < 0) {
+                                std::swap(idx4, idx5);
+                                vertices2[1] = vert_list[idx4];
+                                vertices2[2] = vert_list[idx5];
+                                face_normal2 = -face_normal2;
+                                std::swap(uvs2[1], uvs2[2]);
+                            }
+                    
+
+                            Vector3 normals2[3];
+                            for (int j = 0; j < 3; ++j) {
+                                int edge_idx = triTable[cube_index][i + 3 + j];
+                                int v0 = edgeConnections[edge_idx][0];
+                                int v1 = edgeConnections[edge_idx][1];
+                                int v0_x = static_cast<int>(cubeVertices[v0].x);
+                                int v0_y = static_cast<int>(cubeVertices[v0].y);
+                                int v0_z = static_cast<int>(cubeVertices[v0].z);
+                                int v1_x = static_cast<int>(cubeVertices[v1].x);
+                                int v1_y = static_cast<int>(cubeVertices[v1].y);
+                                int v1_z = static_cast<int>(cubeVertices[v1].z);
+                                float density0 = density_grid[x + v0_x][y + v0_y][z + v0_z];
+                                float density1 = density_grid[x + v1_x][y + v1_y][z + v1_z];
+                                float t = (density1 - density0) > 1e-6f ? (iso_level - density0) / (density1 - density0) : 0.5f;
+                                t = std::clamp(t, 0.0f, 1.0f);
+                                normals2[j] = (vert_normals[v0] + t * (vert_normals[v1] - vert_normals[v0])).normalized();
+                            }
+
+                            for (int j = 0; j < 3; ++j) {
+                                st->set_normal(normals2[j]);
+                                st->set_uv(uvs2[j]);
+                                st->add_vertex(vertices2[j]);
+                            }
+                            triangle_count++;
+                            i += 3;
+                        }
+                       
+                    }
+                    
+                }
+            }
+        }
+    }
+
+    UtilityFunctions::print("Marching Cubes: Completed, triangles: ", triangle_count);
+    return triangle_count;
+}
+*/
+int Chunk::generate_marching_cubes_mesh(Ref<SurfaceTool> st) {
+    if (!st.is_valid()) {
+        UtilityFunctions::printerr("Marching Cubes: Invalid SurfaceTool");
+        return 0;
+    }
+    st->begin(Mesh::PRIMITIVE_TRIANGLES);
+
+    if (!voxel_engine) {
+        UtilityFunctions::printerr("Marching Cubes: Invalid voxel_engine");
+        return 0;
+    }
+    if (!mesh_instance) {
+        UtilityFunctions::printerr("Marching Cubes: Invalid mesh_instance");
+        return 0;
+    }
+
+    int triangle_count = 0;
+    float iso_level = 0.5f;
+
+    float density_grid[CHUNK_SIZE + 1][CHUNK_SIZE + 1][CHUNK_SIZE + 1];
+    for (int x = 0; x <= CHUNK_SIZE; ++x) {
+        for (int y = 0; y <= CHUNK_SIZE; ++y) {
+            for (int z = 0; z <= CHUNK_SIZE; ++z) {
+                Vector3i global_pos = chunk_position * CHUNK_SIZE + Vector3i(x, y, z);
+                float density = get_density_at_global_pos(global_pos);
+                if (!std::isfinite(density)) density = iso_level;
+                density_grid[x][y][z] = density;
+            }
+        }
+    }
+
+    Ref<Texture2D> tilemap = voxel_engine->get_tilemap();
+    int tiles_per_row = tilemap->get_width() / 34;
+    float tile_size_u = 32.0f / tilemap->get_width();
+    float tile_size_v = 32.0f / tilemap->get_height();
+    float padding_u = 1.0f / tilemap->get_width();
+    float padding_v = 1.0f / tilemap->get_height();
+    float uv_offset = 0.5f / tilemap->get_width();
+
+    for (int x = 0; x < CHUNK_SIZE; ++x) {
+        for (int y = 0; y < CHUNK_SIZE; ++y) {
+            for (int z = 0; z < CHUNK_SIZE; ++z) {
+                int cube_index = 0;
+                Vector3 vert_normals[8];
+                for (int i = 0; i < 8; ++i) {
+                    int offset_x = static_cast<int>(cubeVertices[i].x);
+                    int offset_y = static_cast<int>(cubeVertices[i].y);
+                    int offset_z = static_cast<int>(cubeVertices[i].z);
+                    if (density_grid[x + offset_x][y + offset_y][z + offset_z] > iso_level) {
+                        cube_index |= 1 << i;
+                    }
+                    Vector3i global_pos = chunk_position * CHUNK_SIZE + Vector3i(x, y, z) + Vector3i(offset_x, offset_y, offset_z);
+                    float dx = (get_density_at_global_pos(global_pos + Vector3i(1, 0, 0)) - 
+                                get_density_at_global_pos(global_pos - Vector3i(1, 0, 0))) / 2.0f;
+                    float dy = (get_density_at_global_pos(global_pos + Vector3i(0, 1, 0)) - 
+                                get_density_at_global_pos(global_pos - Vector3i(0, 1, 0))) / 2.0f;
+                    float dz = (get_density_at_global_pos(global_pos + Vector3i(0, 0, 1)) - 
+                                get_density_at_global_pos(global_pos - Vector3i(0, 0, 1))) / 2.0f;
+                    vert_normals[i] = Vector3(dx, dy, dz).normalized();
+                }
+
+                if (cube_index == 0 || cube_index == 255) continue;
+
+                Vector3 vert_list[12];
+                for (int i = 0; i < 12; ++i) {
+                    if (edgeTable[cube_index] & (1 << i)) {
+                        int v0 = edgeConnections[i][0];
+                        int v1 = edgeConnections[i][1];
+                        int v0_x = static_cast<int>(cubeVertices[v0].x);
+                        int v0_y = static_cast<int>(cubeVertices[v0].y);
+                        int v0_z = static_cast<int>(cubeVertices[v0].z);
+                        int v1_x = static_cast<int>(cubeVertices[v1].x);
+                        int v1_y = static_cast<int>(cubeVertices[v1].y);
+                        int v1_z = static_cast<int>(cubeVertices[v1].z);
+                        float density0 = density_grid[x + v0_x][y + v0_y][z + v0_z];
+                        float density1 = density_grid[x + v1_x][y + v1_y][z + v1_z];
+                        float t = (density1 - density0) > 1e-6f ? (iso_level - density0) / (density1 - density0) : 0.5f;
+                        t = std::clamp(t, 0.0f, 1.0f);
+                        vert_list[i] = cubeVertices[v0] + Vector3(x, y, z) + t * (cubeVertices[v1] - cubeVertices[v0]);
+                    }
+                }
+
+                Voxel* voxel = get_voxel(Vector3i(x, y, z));
+                if (!voxel) continue;
+
+                for (int i = 0; triTable[cube_index][i] != -1; i += 3) {
+                    int idx0 = triTable[cube_index][i];
+                    int idx1 = triTable[cube_index][i + 1];
+                    int idx2 = triTable[cube_index][i + 2];
+
+                    Vector3 vertices[3] = { vert_list[idx0], vert_list[idx1], vert_list[idx2] };
+                    Vector3 edge1 = vertices[1] - vertices[0];
+                    Vector3 edge2 = vertices[2] - vertices[0];
+                    Vector3 face_normal = edge1.cross(edge2).normalized();
+
+                    if (edge1.cross(edge2).length() / 2.0f < 1e-4f) continue;
+
+                    int texture_index = 0;
+                    if (face_normal.dot(Vector3(1, 0, 0)) > 0.7f) texture_index = 0; // Right
+                    else if (face_normal.dot(Vector3(-1, 0, 0)) > 0.7f) texture_index = 1; // Left
+                    else if (face_normal.dot(Vector3(0, 1, 0)) > 0.7f) texture_index = 2; // Up
+                    else if (face_normal.dot(Vector3(0, -1, 0)) > 0.7f) texture_index = 3; // Down
+                    else if (face_normal.dot(Vector3(0, 0, 1)) > 0.7f) texture_index = 4; // Forward
+                    else if (face_normal.dot(Vector3(0, 0, -1)) > 0.7f) texture_index = 5; // Back
+
+                    uint8_t texture_id = 1;
+                    if (SingleTextureVoxel* simple_voxel = dynamic_cast<SingleTextureVoxel*>(voxel)) {
+                        texture_id = simple_voxel->texture_id - 1;
+                    } else if (MultiTextureVoxel* multi_voxel = dynamic_cast<MultiTextureVoxel*>(voxel)) {
+                        texture_id = multi_voxel->texture_ids[texture_index] - 1;
+                    }
+
+                    float tile_u = (texture_id % tiles_per_row) * 34.0f / tilemap->get_width() + padding_u;
+                    float tile_v = (texture_id / tiles_per_row) * 34.0f / tilemap->get_height() + padding_v;
+
+                    // Bestimme die UV-Achsen basierend auf der Flächenorientierung
+                    Vector3 u_axis, v_axis;
+                    if (texture_index == 0 || texture_index == 1) { // Right/Left (X-Achse)
+                        u_axis = Vector3(0, 0, 1); // Z-Achse
+                        v_axis = Vector3(0, 1, 0); // Y-Achse
+                    } else if (texture_index == 2 || texture_index == 3) { // Up/Down (Y-Achse)
+                        u_axis = Vector3(1, 0, 0); // X-Achse
+                        v_axis = Vector3(0, 0, 1); // Z-Achse
+                    } else { // Forward/Back (Z-Achse)
+                        u_axis = Vector3(1, 0, 0); // X-Achse
+                        v_axis = Vector3(0, 1, 0); // Y-Achse
+                    }
+
+                    // Berechne UV-Koordinaten basierend auf Vertex-Positionen
+                    Vector2 uvs[3];
+                    for (int j = 0; j < 3; ++j) {
+                        /*
+                        float u = vertices[j].dot(u_axis);
+                        float v = vertices[j].dot(v_axis);
+                        // Normalisiere die UV-Koordinaten auf [0, 1] und passe sie an die Textur an
+                        u = (u - x) * tile_size_u;
+                        v = (v - (texture_index == 2 || texture_index == 3 ? z : y)) * tile_size_v;
+                        */
+                        float u = vertices[j].dot(u_axis);
+                        float v = vertices[j].dot(v_axis);
+                        // Extrahiere den Dezimalanteil, um u und v auf [0, 1] zu normalisieren
+                        u = u - std::floor(u);
+                        v = v - std::floor(v);
+                        // Skaliere auf die Größe eines Tiles im Texturatlas
+                        u = tile_u + u * tile_size_u;
+                        v = tile_v + v * tile_size_v;
+
+                        // Korrigiere die Ausrichtung basierend auf add_face
+                        if (texture_index == 0) { // Right
+                            uvs[j] = Vector2(tile_u + (1.0f - v) * tile_size_u - uv_offset, tile_v + u * tile_size_v - uv_offset);
+                        } else if (texture_index == 1) { // Left
+                            uvs[j] = Vector2(tile_u + v * tile_size_u - uv_offset, tile_v + u * tile_size_v - uv_offset);
+                        } else if (texture_index == 2) { // Up
+                            uvs[j] = Vector2(tile_u + u * tile_size_u - uv_offset, tile_v + (1.0f - v) * tile_size_v - uv_offset);
+                        } else if (texture_index == 3) { // Down
+                            uvs[j] = Vector2(tile_u + u * tile_size_u - uv_offset, tile_v + v * tile_size_v - uv_offset);
+                        } else if (texture_index == 4) { // Forward
+                            uvs[j] = Vector2(tile_u + u * tile_size_u - uv_offset, tile_v + v * tile_size_v - uv_offset);
+                        } else { // Back
+                            uvs[j] = Vector2(tile_u + (1.0f - u) * tile_size_u - uv_offset, tile_v + v * tile_size_v - uv_offset);
+                        }
+                    }
+
+                    Vector3 tri_center = (vertices[0] + vertices[1] + vertices[2]) / 3.0f;
+                    Vector3i grid_pos = Vector3i(x, y, z) + Vector3i(
+                        static_cast<int>(std::round(tri_center.x)),
+                        static_cast<int>(std::round(tri_center.y)),
+                        static_cast<int>(std::round(tri_center.z))
+                    );
+                    Vector3i global_pos = chunk_position * CHUNK_SIZE + grid_pos;
+                    float dx = (get_density_at_global_pos(global_pos + Vector3i(1, 0, 0)) - 
+                                get_density_at_global_pos(global_pos - Vector3i(1, 0, 0))) / 2.0f;
+                    float dy = (get_density_at_global_pos(global_pos + Vector3i(0, 1, 0)) - 
+                                get_density_at_global_pos(global_pos - Vector3i(0, 1, 0))) / 2.0f;
+                    float dz = (get_density_at_global_pos(global_pos + Vector3i(0, 0, 1)) - 
+                                get_density_at_global_pos(global_pos - Vector3i(0, 0, 1))) / 2.0f;
+                    Vector3 grad_normal = Vector3(dx, dy, dz).normalized();
+
+                    if (face_normal.dot(grad_normal) < 0) {
+                        std::swap(idx1, idx2);
+                        vertices[1] = vert_list[idx1];
+                        vertices[2] = vert_list[idx2];
+                        face_normal = -face_normal;
+                        std::swap(uvs[1], uvs[2]);
+                    }
+
+                    Vector3 normals[3];
+                    for (int j = 0; j < 3; ++j) {
+                        int edge_idx = triTable[cube_index][i + j];
+                        int v0 = edgeConnections[edge_idx][0];
+                        int v1 = edgeConnections[edge_idx][1];
+                        int v0_x = static_cast<int>(cubeVertices[v0].x);
+                        int v0_y = static_cast<int>(cubeVertices[v0].y);
+                        int v0_z = static_cast<int>(cubeVertices[v0].z);
+                        int v1_x = static_cast<int>(cubeVertices[v1].x);
+                        int v1_y = static_cast<int>(cubeVertices[v1].y);
+                        int v1_z = static_cast<int>(cubeVertices[v1].z);
+                        float density0 = density_grid[x + v0_x][y + v0_y][z + v0_z];
+                        float density1 = density_grid[x + v1_x][y + v1_y][z + v1_z];
+                        float t = (density1 - density0) > 1e-6f ? (iso_level - density0) / (density1 - density0) : 0.5f;
+                        t = std::clamp(t, 0.0f, 1.0f);
+                        normals[j] = (vert_normals[v0] + t * (vert_normals[v1] - vert_normals[v0])).normalized();
+                    }
+
+                    for (int j = 0; j < 3; ++j) {
+                        st->set_normal(normals[j]);
+                        st->set_uv(uvs[j]);
+                        st->add_vertex(vertices[j]);
+                    }
+                    triangle_count++;
+
+                    // Zweites Dreieck eines Quads
+                    if (i + 3 < 16 && triTable[cube_index][i + 3] != -1) {
+                        int idx3 = triTable[cube_index][i + 3];
+                        int idx4 = triTable[cube_index][i + 4];
+                        int idx5 = triTable[cube_index][i + 5];
+
+                        Vector3 vertices2[3] = { vert_list[idx3], vert_list[idx4], vert_list[idx5] };
+                        Vector3 edge1_2 = vertices2[1] - vertices2[0];
+                        Vector3 edge2_2 = vertices2[2] - vertices2[0];
+                        Vector3 face_normal2 = edge1_2.cross(edge2_2).normalized();
+
+                        if (edge1_2.cross(edge2_2).length() / 2.0f < 1e-4f) {
+                            i += 3;
+                            continue;
+                        }
+
+                        if (face_normal2.dot(face_normal) > 0.9f) {
+                            Vector2 uvs2[3];
+                            for (int j = 0; j < 3; ++j) {
+                                /*
+                                float u = vertices2[j].dot(u_axis);
+                                float v = vertices2[j].dot(v_axis);
+                                u = (u - x) * tile_size_u;
+                                v = (v - (texture_index == 2 || texture_index == 3 ? z : y)) * tile_size_v;
+                                */
+                                float u = vertices2[j].dot(u_axis);
+                                float v = vertices2[j].dot(v_axis);
+                                // Extrahiere den Dezimalanteil, um u und v auf [0, 1] zu normalisieren
+                                u = u - std::floor(u);
+                                v = v - std::floor(v);
+                                // Skaliere auf die Größe eines Tiles im Texturatlas
+                                u = tile_u + u * tile_size_u;
+                                v = tile_v + v * tile_size_v;
+
+
+                                if (texture_index == 0) { // Right
+                                    uvs2[j] = Vector2(tile_u + (1.0f - v) * tile_size_u - uv_offset, tile_v + u * tile_size_v - uv_offset);
+                                } else if (texture_index == 1) { // Left
+                                    uvs2[j] = Vector2(tile_u + v * tile_size_u - uv_offset, tile_v + u * tile_size_v - uv_offset);
+                                } else if (texture_index == 2) { // Up
+                                    uvs2[j] = Vector2(tile_u + u * tile_size_u - uv_offset, tile_v + (1.0f - v) * tile_size_v - uv_offset);
+                                } else if (texture_index == 3) { // Down
+                                    uvs2[j] = Vector2(tile_u + u * tile_size_u - uv_offset, tile_v + v * tile_size_v - uv_offset);
+                                } else if (texture_index == 4) { // Forward
+                                    uvs2[j] = Vector2(tile_u + u * tile_size_u - uv_offset, tile_v + v * tile_size_v - uv_offset);
+                                } else { // Back
+                                    uvs2[j] = Vector2(tile_u + (1.0f - u) * tile_size_u - uv_offset, tile_v + v * tile_size_v - uv_offset);
+                                }
                             }
 
                             if (face_normal2.dot(grad_normal) < 0) {
@@ -752,7 +1068,6 @@ int Chunk::generate_marching_cubes_mesh(Ref<SurfaceTool> st) {
     UtilityFunctions::print("Marching Cubes: Completed, triangles: ", triangle_count);
     return triangle_count;
 }
-
     
 bool Chunk::is_in_bounds(const Vector3i& pos) const {
     return pos.x >= 0 && pos.x < CHUNK_SIZE &&

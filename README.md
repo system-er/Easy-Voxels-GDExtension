@@ -22,7 +22,7 @@ you can use it for example in gdscript:
   # set mode cubic
   ve.set_mesh_mode(0)
 	
-  # initialize VoxelEngine sizex, sizey, sizez(set to 64,32,64 only for demo its your decision), tilemap with padding, parentnode, camera3D
+  # initialize VoxelEngine sizex, sizey, sizez, tilemap with padding, parentnode, camera3D
   ve.InitVE(64, 32, 64, ResourceLoader.load("res://resources/textures/tilemap32.png"), self, get_node("Camera3D"))
 
   # set some voxels
@@ -33,7 +33,7 @@ you can use it for example in gdscript:
 ```
 
 # the methods with parameters:    
-InitVE "size_x", "size_y", "size_z", "tex", "parentnode" ( size set in demo to 64, 32, 64 - but you can change to bigger...)    
+InitVE "size_x", "size_y", "size_z", "tex", "parentnode"        
 set_voxel_singletexture "global_pos", "textureid", "density"            
 set_voxel_multitexture "global_pos",  "right", "left", "up", "down", "forward", "back", "density"     
 update_world    

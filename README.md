@@ -11,6 +11,9 @@ for use of the binaries put into bin-directory.
 picture from demo mode 0 = cubic voxel:        
 ![Pic1](gdexample/pic1.jpg)
 
+first pic from demo mode 1 = marchingcubes voxel(still with some bugs):        
+![Pic1](gdexample/marchingcubes.jpg)
+
 usage example pic (terraintest):    
 ![Pic2](gdexample/examplediamondsquare.jpg)
 

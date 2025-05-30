@@ -695,7 +695,7 @@ int Chunk::generate_marching_cubes_mesh(Ref<SurfaceTool> st) {
                             }
                         }
                     }
-
+/*
                     float tile_u = (texture_id % tiles_per_row) * 34.0f / tilemap->get_width() + padding_u;
                     float tile_v = (texture_id / tiles_per_row) * 34.0f / tilemap->get_height() + padding_v;
                     Vector2 uvs[3];
@@ -734,7 +734,90 @@ int Chunk::generate_marching_cubes_mesh(Ref<SurfaceTool> st) {
                         uvs[j] = Vector2(tile_u + uCal * tile_size_u - uv_offset,
                                          tile_v + vCal * tile_size_v - uv_offset);
                     }
-                    
+                    */
+
+float tile_u = (texture_id % tiles_per_row) * 34.0f / tilemap->get_width() + padding_u;
+float tile_v = (texture_id / tiles_per_row) * 34.0f / tilemap->get_height() + padding_v;
+
+// Sicherstellen, dass die UV-Koordinaten nicht in den Randbereich ragen
+float uv_padding = uv_offset * 2.0f; // Verstärktes Padding, um Interpolationseffekte zu vermeiden
+
+Vector2 uvs[3];
+for (int j = 0; j < 3; ++j) {
+    Vector3 local = triVerts[j] - Vector3(x, y, z);
+    float uCal = 0.0f, vCal = 0.0f;
+
+    switch (texture_index) {
+        case 0: // Right
+            uCal = 1.0f - (local.z + 0.5f);
+            vCal = 1.0f - (local.y + 0.5f);
+            break;
+        case 1: // Left
+            uCal = local.z + 0.5f;
+            vCal = 1.0f - (local.y + 0.5f);
+            break;
+        case 2: // Up
+            uCal = 1.0f - (local.x + 0.5f);
+            vCal = 1.0f - (local.z + 0.5f);
+            break;
+        case 3: // Down
+            uCal = local.x + 0.5f;
+            vCal = local.z + 0.5f;
+            break;
+        case 4: // Forward
+            uCal = local.x + 0.5f;
+            vCal = 1.0f - (local.y + 0.5f);
+            break;
+        case 5: // Back
+            uCal = 1.0f - (local.x + 0.5f);
+            vCal = 1.0f - (local.y + 0.5f);
+            break;
+        default:
+            break;
+    }
+
+    // Anpassung der UV-Koordinaten
+    float uFinal, vFinal;
+    if (texture_index == 2) { // Up
+        // Direktes Mapping auf die Ecken der Textur, ähnlich wie in add_face
+        if (uCal > 0.5f && vCal > 0.5f) { // Ecke: x = -0.5, z = -0.5
+            uFinal = tile_u + 1.0f * tile_size_u - uv_padding;
+            vFinal = tile_v + 1.0f * tile_size_v - uv_padding;
+        } else if (uCal > 0.5f && vCal <= 0.5f) { // Ecke: x = -0.5, z = 0.5
+            uFinal = tile_u + 1.0f * tile_size_u - uv_padding;
+            vFinal = tile_v + 0.0f * tile_size_v + uv_padding;
+        } else if (uCal <= 0.5f && vCal > 0.5f) { // Ecke: x = 0.5, z = -0.5
+            uFinal = tile_u + 0.0f * tile_size_u + uv_padding;
+            vFinal = tile_v + 1.0f * tile_size_v - uv_padding;
+        } else { // Ecke: x = 0.5, z = 0.5
+            uFinal = tile_u + 0.0f * tile_size_u + uv_padding;
+            vFinal = tile_v + 0.0f * tile_size_v + uv_padding;
+        }
+    } else if (texture_index == 3) { // Down
+        // Direktes Mapping auf die Ecken der Textur, ähnlich wie in add_face
+        if (uCal < 0.5f && vCal < 0.5f) { // Ecke: x = -0.5, z = -0.5
+            uFinal = tile_u + 0.0f * tile_size_u + uv_padding;
+            vFinal = tile_v + 0.0f * tile_size_v + uv_padding;
+        } else if (uCal < 0.5f && vCal >= 0.5f) { // Ecke: x = -0.5, z = 0.5
+            uFinal = tile_u + 0.0f * tile_size_u + uv_padding;
+            vFinal = tile_v + 1.0f * tile_size_v - uv_padding;
+        } else if (uCal >= 0.5f && vCal < 0.5f) { // Ecke: x = 0.5, z = -0.5
+            uFinal = tile_u + 1.0f * tile_size_u - uv_padding;
+            vFinal = tile_v + 0.0f * tile_size_v + uv_padding;
+        } else { // Ecke: x = 0.5, z = 0.5
+            uFinal = tile_u + 1.0f * tile_size_u - uv_padding;
+            vFinal = tile_v + 1.0f * tile_size_v - uv_padding;
+        }
+    } else {
+        // Für seitliche Flächen (Right, Left, Forward, Back)
+        uFinal = uCal < 0.5f ? (tile_u + uCal * tile_size_u + uv_offset) : (tile_u + uCal * tile_size_u - uv_offset);
+        vFinal = vCal < 0.5f ? (tile_v + vCal * tile_size_v + uv_offset) : (tile_v + vCal * tile_size_v - uv_offset);
+    }
+
+    uvs[j] = Vector2(uFinal, vFinal);
+
+    UtilityFunctions::print("UV for vertex ", j, " at position (", x, ",", y, ",", z, "), face ", texture_index, ": ", uvs[j]);
+}
 
                     Vector3 vertex_normals[3];
                     for (int j = 0; j < 3; ++j) {

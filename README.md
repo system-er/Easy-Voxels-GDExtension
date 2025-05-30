@@ -62,4 +62,6 @@ get_mesh_mode
 v0.2: changed identify_voxel in voxelengine.cpp and added a test in demo/src/node3d.gd    
 v0.3: changed voxels from "normal" array to std::unordered_map, new function fill_voxel_region     
 v0.4: added new mode for marchingcubes voxels. set with set_mesh_mode(1). still some bugs...    
+v0.4.1: in mode1: texture16-bug is gone. texture-seams half gone...    
+
 

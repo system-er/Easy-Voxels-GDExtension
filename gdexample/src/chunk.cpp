@@ -625,83 +625,79 @@ int Chunk::generate_marching_cubes_mesh(Ref<SurfaceTool> st) {
                     */
 
                     // Array, um die umliegenden Voxel zu speichern
-Voxel* corner_voxels[8];
-for (int i = 0; i < 8; i++) {
-    int dx = (i & 1) ? 1 : 0;
-    int dy = (i & 2) ? 1 : 0;
-    int dz = (i & 4) ? 1 : 0;
-    corner_voxels[i] = get_voxel(Vector3i(x + dx, y + dy, z + dz));
-}
+                Voxel* corner_voxels[8];
+                for (int i = 0; i < 8; i++) {
+                    int dx = (i & 1) ? 1 : 0;
+                    int dy = (i & 2) ? 1 : 0;
+                    int dz = (i & 4) ? 1 : 0;
+                    corner_voxels[i] = get_voxel(Vector3i(x + dx, y + dy, z + dz));
+                }
 
-// Bestimme die texture_id basierend auf den umliegenden Voxeln
-uint8_t texture_id = 1; // Standardwert, falls kein voller Voxel gefunden wird
-int texture_index = 0;
-bool found_valid_voxel = false;
+                uint8_t texture_id = 1;
+                int texture_index = 0;
+                bool found_valid_voxel = false;
 
-for (int i = 0; i < 8; i++) {
-    if (corner_voxels[i]) {
-        if (SingleTextureVoxel* simple_voxel = dynamic_cast<SingleTextureVoxel*>(corner_voxels[i])) {
-            if (simple_voxel->texture_id != 0) {
-                texture_id = simple_voxel->texture_id - 1;
-                found_valid_voxel = true;
-                break; // Verwende die erste gefundene gültige texture_id
-            }
-        } else if (MultiTextureVoxel* multi_voxel = dynamic_cast<MultiTextureVoxel*>(corner_voxels[i])) {
-            texture_id = multi_voxel->texture_ids[0] - 1;
-            found_valid_voxel = true;
-            break;
-        }
-    }
-}
+                for (int i = 0; i < 8; i++) {
+                    if (corner_voxels[i]) {
+                        if (SingleTextureVoxel* simple_voxel = dynamic_cast<SingleTextureVoxel*>(corner_voxels[i])) {
+                            if (simple_voxel->texture_id != 0) {
+                                texture_id = simple_voxel->texture_id - 1;
+                                found_valid_voxel = true;
+                                break;
+                            }
+                        } else if (MultiTextureVoxel* multi_voxel = dynamic_cast<MultiTextureVoxel*>(corner_voxels[i])) {
+                            texture_id = multi_voxel->texture_ids[0] - 1;
+                            found_valid_voxel = true;
+                            break;
+                        }
+                    }
+                }
 
-if (!found_valid_voxel) {
-    // Kein gültiger Voxel gefunden, überspringe diese Zelle
-    continue;
-}
+                if (!found_valid_voxel) {
+                    continue;
+                }
 
-UtilityFunctions::print("Using texture_id: ", (int)texture_id, " for position (", x, ",", y, ",", z, ")");
+                //UtilityFunctions::print("Using texture_id: ", (int)texture_id, " for position (", x, ",", y, ",", z, ")");
 
-// Rest des Codes bleibt unverändert
-for (int i = 0; triTable[cube_index][i] != -1; i += 3) {
-    int idx0 = triTable[cube_index][i];
-    int idx1 = triTable[cube_index][i + 1];
-    int idx2 = triTable[cube_index][i + 2];
-    
-    Vector3 triVerts[3] = { vert_list[idx0], vert_list[idx1], vert_list[idx2] };
-    Vector3 edge1 = triVerts[1] - triVerts[0];
-    Vector3 edge2 = triVerts[2] - triVerts[0];
-    Vector3 face_normal = edge1.cross(edge2).normalized();
-    if (edge1.cross(edge2).length() / 2.0f < 1e-4f)
-        continue;
 
-    // Bestimme die Orientierung der Fläche
-    if (face_normal.dot(Vector3(1, 0, 0)) > 0.7f)
-        texture_index = 0;
-    else if (face_normal.dot(Vector3(-1, 0, 0)) > 0.7f)
-        texture_index = 1;
-    else if (face_normal.dot(Vector3(0, 1, 0)) > 0.7f)
-        texture_index = 2;
-    else if (face_normal.dot(Vector3(0, -1, 0)) > 0.7f)
-        texture_index = 3;
-    else if (face_normal.dot(Vector3(0, 0, 1)) > 0.7f)
-        texture_index = 4;
-    else if (face_normal.dot(Vector3(0, 0, -1)) > 0.7f)
-        texture_index = 5;
+                for (int i = 0; triTable[cube_index][i] != -1; i += 3) {
+                    int idx0 = triTable[cube_index][i];
+                    int idx1 = triTable[cube_index][i + 1];
+                    int idx2 = triTable[cube_index][i + 2];
+                    
+                    Vector3 triVerts[3] = { vert_list[idx0], vert_list[idx1], vert_list[idx2] };
+                    Vector3 edge1 = triVerts[1] - triVerts[0];
+                    Vector3 edge2 = triVerts[2] - triVerts[0];
+                    Vector3 face_normal = edge1.cross(edge2).normalized();
+                    if (edge1.cross(edge2).length() / 2.0f < 1e-4f)
+                        continue;
 
-    // Für MultiTextureVoxel die texture_id basierend auf texture_index aktualisieren
-    // Wir könnten hier auch die MultiTextureVoxel-Logik anpassen, falls nötig
-    bool updated = false;
-    for (int i = 0; i < 8 && !updated; i++) {
-        if (corner_voxels[i]) {
-            if (MultiTextureVoxel* multi_voxel = dynamic_cast<MultiTextureVoxel*>(corner_voxels[i])) {
-                texture_id = multi_voxel->texture_ids[texture_index] - 1;
-                updated = true;
-            }
-        }
-    }
+                    if (face_normal.dot(Vector3(1, 0, 0)) > 0.7f)
+                        texture_index = 0;
+                    else if (face_normal.dot(Vector3(-1, 0, 0)) > 0.7f)
+                        texture_index = 1;
+                    else if (face_normal.dot(Vector3(0, 1, 0)) > 0.7f)
+                        texture_index = 2;
+                    else if (face_normal.dot(Vector3(0, -1, 0)) > 0.7f)
+                        texture_index = 3;
+                    else if (face_normal.dot(Vector3(0, 0, 1)) > 0.7f)
+                        texture_index = 4;
+                    else if (face_normal.dot(Vector3(0, 0, -1)) > 0.7f)
+                        texture_index = 5;
 
-    float tile_u = (texture_id % tiles_per_row) * 34.0f / tilemap->get_width() + padding_u;
-    float tile_v = (texture_id / tiles_per_row) * 34.0f / tilemap->get_height() + padding_v;
+
+                    bool updated = false;
+                    for (int i = 0; i < 8 && !updated; i++) {
+                        if (corner_voxels[i]) {
+                            if (MultiTextureVoxel* multi_voxel = dynamic_cast<MultiTextureVoxel*>(corner_voxels[i])) {
+                                texture_id = multi_voxel->texture_ids[texture_index] - 1;
+                                updated = true;
+                            }
+                        }
+                    }
+
+                    float tile_u = (texture_id % tiles_per_row) * 34.0f / tilemap->get_width() + padding_u;
+                    float tile_v = (texture_id / tiles_per_row) * 34.0f / tilemap->get_height() + padding_v;
                     Vector2 uvs[3];
                     for (int j = 0; j < 3; ++j) {
                         Vector3 local = triVerts[j] - Vector3(x, y, z);

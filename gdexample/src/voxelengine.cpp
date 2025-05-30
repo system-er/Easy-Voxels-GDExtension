@@ -2,6 +2,7 @@
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/classes/viewport.hpp> 
+#include "math.h"
 
 using namespace godot;
 
@@ -106,6 +107,33 @@ void VoxelEngine::set_voxel_singletexture(const Vector3i& global_pos, uint8_t te
 
     chunks[index]->set_voxel(local_pos, voxel);
 }
+
+void VoxelEngine::sphere_singletexture(const godot::Vector3i& global_pos, uint8_t textureid, int radius, float density){
+    if (!is_in_world(global_pos)) 
+    {
+        return;
+    }
+    int r = radius;
+
+	for (int z = global_pos.z-r; z < global_pos.z+r; z++)
+    {
+		for (int y = global_pos.y-r; y < global_pos.y+r; y++)
+        {
+			for (int x = global_pos.x-r; x < global_pos.x+r; x++)
+            {
+                if (((x - global_pos.x) * (x - global_pos.x) +
+                    (y - global_pos.y) * (y - global_pos.y) +
+                    (z - global_pos.z) * (z - global_pos.z)) <= r * r) 
+                {
+                    set_voxel_singletexture(Vector3i(x, y, z), textureid, density);
+                    UtilityFunctions::print("set voxel");
+                }
+            }
+        }
+    }
+
+}
+
 
 void VoxelEngine::set_voxel_multitexture(const Vector3i& global_pos, 
     uint8_t right, uint8_t left, uint8_t up, uint8_t down, uint8_t forward, uint8_t back, float density) {
@@ -625,6 +653,7 @@ void VoxelEngine::_bind_methods() {
     &VoxelEngine::fill_voxel_region, DEFVAL(godot::PackedByteArray()));
     ClassDB::bind_method(D_METHOD("set_mesh_mode", "mode"), &VoxelEngine::set_mesh_mode);
     ClassDB::bind_method(D_METHOD("get_mesh_mode"), &VoxelEngine::get_mesh_mode);
+    ClassDB::bind_method(D_METHOD("sphere_singletexture", "global_pos", "textureid", "radius", "density"), &VoxelEngine::sphere_singletexture);
     //ClassDB::add_property("VoxelEngine", PropertyInfo(Variant::INT, "mesh_mode", PROPERTY_HINT_ENUM, "Cube:0,Marching Cubes:1"), "set_mesh_mode", "get_mesh_mode");
 }
 

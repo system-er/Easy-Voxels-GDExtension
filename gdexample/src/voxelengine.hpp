@@ -59,6 +59,7 @@ public:
     void set_voxel_singletexture(const godot::Vector3i& global_pos, uint8_t textureid,float density = 0.0f);
     void set_voxel_multitexture(const godot::Vector3i& global_pos, 
     uint8_t right, uint8_t left, uint8_t up, uint8_t down, uint8_t forward, uint8_t back, float density = 0.0f);
+    void sphere_singletexture(const godot::Vector3i& global_pos, uint8_t textureid, int radius, float density = 0.0f);
     void fill_voxel_region(const godot::Vector3i& start, const godot::Vector3i& end, int voxel_type, 
         uint8_t texture_id, const godot::PackedByteArray& multi_texture_ids = godot::PackedByteArray(), float density = 0.0f);
     void delete_voxel(const godot::Vector3i& global_pos);

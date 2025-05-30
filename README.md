@@ -14,8 +14,6 @@ picture from demo mode 0 = cubic voxel:
 first pic from demo mode 1 = marchingcubes voxel(still with some bugs):        
 ![Pic1](gdexample/marchingcubes.jpg)
 
-usage example pic (terraintest):    
-![Pic2](gdexample/examplediamondsquare.jpg)
 
 you can use it for example in gdscript:    
 ```

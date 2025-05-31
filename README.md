@@ -8,7 +8,7 @@ the gdextension creates a new Node VoxelEngine.
 for build with scons copy godot-cpp version 4.4.1 into directory godot-cpp    
 for use of the binaries put into bin-directory.     
 
-in the demo: if you press SPACE, the mode changes from and cubic to marchingcubes and viceversa,    
+in the demo: if you press SPACE, the mode changes from cubic to marchingcubes and viceversa,    
 if you press ESC the program exits.    
       
 picture from demo, mode 0 = cubic voxel:        

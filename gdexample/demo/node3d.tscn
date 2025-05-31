@@ -7,9 +7,9 @@
 script = ExtResource("1_a6orm")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(-0.164204, 0.240893, -0.95656, -4.43841e-09, 0.969723, 0.244207, 0.986426, 0.0400998, -0.159232, 8.69599, 3.52283, 13.4159)
+transform = Transform3D(-0.342037, 0.229479, -0.911236, 8.90433e-09, 0.969723, 0.244208, 0.939687, 0.0835281, -0.331681, -0.706428, 5.75248, 12.2912)
 script = ExtResource("1_tlqte")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.388551, 0.65773, -0.645306, -0.339278, 0.753254, 0.563471, 0.856691, 7.31241e-07, 0.515831, -0.624904, 1.57913, 1.48555)
+transform = Transform3D(0.388551, 0.65773, -0.645306, -0.339278, 0.753254, 0.563471, 0.856691, 9.39271e-07, 0.515831, 15.5691, 35.7815, 31.5304)
 shadow_enabled = true

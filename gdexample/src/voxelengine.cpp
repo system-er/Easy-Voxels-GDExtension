@@ -47,7 +47,7 @@ void VoxelEngine::InitVE(int size_x, int size_y, int size_z,
 
 
 void VoxelEngine::update_world() {
-    UtilityFunctions::print("UpdateWorld: Starting");
+    //UtilityFunctions::print("UpdateWorld: Starting");
     for (Chunk* chunk : chunks) {
         if (chunk) {
             //UtilityFunctions::print("UpdateWorld: Updating chunk at ", chunk->get_position());
@@ -56,9 +56,19 @@ void VoxelEngine::update_world() {
     }
 }
 
+void VoxelEngine::refresh_world() {
+    //UtilityFunctions::print("UpdateWorld: Starting");
+    for (Chunk* chunk : chunks) {
+        if (chunk) {
+            chunk->needs_mesh_update = true;
+            chunk->update_mesh();
+        }
+    }
+}
+
 void VoxelEngine::set_mesh_mode(int mode) {
     mesh_mode = mode;
-    update_world();
+    //refresh_world();
 }
 
 int VoxelEngine::get_mesh_mode() const {
@@ -126,7 +136,7 @@ void VoxelEngine::sphere_singletexture(const godot::Vector3i& global_pos, uint8_
                     (z - global_pos.z) * (z - global_pos.z)) <= r * r) 
                 {
                     set_voxel_singletexture(Vector3i(x, y, z), textureid, density);
-                    UtilityFunctions::print("set voxel");
+                    //UtilityFunctions::print("set voxel");
                 }
             }
         }
@@ -645,6 +655,7 @@ void VoxelEngine::_bind_methods() {
         "right", "left", "up", "down", "forward", "back", "density"), 
         &VoxelEngine::set_voxel_multitexture);
     ClassDB::bind_method(D_METHOD("update_world"), &VoxelEngine::update_world);
+    ClassDB::bind_method(D_METHOD("refresh_world"), &VoxelEngine::refresh_world);
     ClassDB::bind_method(D_METHOD("delete_voxel", "global_pos"), &VoxelEngine::delete_voxel);
     ClassDB::bind_method(D_METHOD("get_voxel_type", "global_pos"), &VoxelEngine::get_voxel_type);
     ClassDB::bind_method(D_METHOD("get_voxel_texture", "global_pos", "nr"), &VoxelEngine::get_voxel_texture);

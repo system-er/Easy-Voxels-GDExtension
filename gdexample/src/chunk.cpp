@@ -816,7 +816,7 @@ for (int j = 0; j < 3; ++j) {
 
     uvs[j] = Vector2(uFinal, vFinal);
 
-    UtilityFunctions::print("UV for vertex ", j, " at position (", x, ",", y, ",", z, "), face ", texture_index, ": ", uvs[j]);
+    //UtilityFunctions::print("UV for vertex ", j, " at position (", x, ",", y, ",", z, "), face ", texture_index, ": ", uvs[j]);
 }
 
                     Vector3 vertex_normals[3];

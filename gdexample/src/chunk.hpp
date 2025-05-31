@@ -36,7 +36,7 @@ private:
     godot::MeshInstance3D *mesh_instance; // = nullptr;
     //SurfaceTool *sm3d = nullptr;
     VoxelEngine* voxel_engine;
-    bool needs_mesh_update;
+    //bool needs_mesh_update;
     //godot::Ref<godot::StandardMaterial3D> sm3d;
     godot::StandardMaterial3D *sm3d; // = nullptr;
 
@@ -69,7 +69,7 @@ public:
     Chunk();
     Chunk(VoxelEngine* engine, const godot::Vector3i& chunk_pos);
     ~Chunk();
-
+    bool needs_mesh_update;
 
     void init();
     void set_voxel(const godot::Vector3i& local_pos, Voxel* voxel);

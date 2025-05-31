@@ -55,6 +55,7 @@ public:
         godot::Ref<godot::Texture2D> tex, godot::Node3D* parentnode, godot::Camera3D* cameranode);
     void set_parentnode(Node3D* node);
     void update_world();
+    void refresh_world();
     //void set_voxel(const godot::Vector3i& global_pos, Voxel* voxel);
     void set_voxel_singletexture(const godot::Vector3i& global_pos, uint8_t textureid,float density = 0.0f);
     void set_voxel_multitexture(const godot::Vector3i& global_pos, 

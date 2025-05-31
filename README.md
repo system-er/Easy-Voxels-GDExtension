@@ -7,6 +7,9 @@ the tileset is 32x32 + 1 pixel padding (leave 1 pixel seam around every texture)
 the gdextension creates a new Node VoxelEngine.    
 for build with scons copy godot-cpp version 4.4.1 into directory godot-cpp    
 for use of the binaries put into bin-directory.     
+
+in the demo: if you press SPACE, the mode changes from and cubic to marchingcubes and viceversa,    
+if you press ESC the program exits.    
       
 picture from demo, mode 0 = cubic voxel:        
 ![Pic1](gdexample/pic1.jpg)
@@ -37,7 +40,8 @@ you can use it for example in gdscript:
 InitVE "size_x", "size_y", "size_z", "tex", "parentnode"        
 set_voxel_singletexture "global_pos", "textureid", "density"            
 set_voxel_multitexture "global_pos",  "right", "left", "up", "down", "forward", "back", "density"     
-update_world    
+update_world   
+refresh_world    
 delete_voxel "global_pos"    
 get_voxel_type "global_pos"    
 get_voxel_texture "global_pos", "nr"    
@@ -63,5 +67,6 @@ v0.2: changed identify_voxel in voxelengine.cpp and added a test in demo/src/nod
 v0.3: changed voxels from "normal" array to std::unordered_map, new function fill_voxel_region     
 v0.4: added new mode for marchingcubes voxels. set with set_mesh_mode(1). still some bugs...    
 v0.4.1: in mode1: texture16-bug is gone. texture-seams half gone...    
+v0.4.2: new command refresh_world(), sphere_singletexture    
 
 

@@ -24,8 +24,8 @@ func _ready() -> void:
 	#ve.fill_voxel_region(Vector3i(0, 0, 0), Vector3i(32, 2, 32), 1, 2, PackedByteArray(), 1.0) 
 	ve.fill_voxel_region(Vector3i(0, 0, 0), Vector3i(31, 0, 31), 1, 2, PackedByteArray(), 1.0)
 	ve.fill_voxel_region(Vector3i(12, 1, 12), Vector3i(20, 3, 20), 1, 6, PackedByteArray(), 1.0) 
-	ve.fill_voxel_region(Vector3i(14, 2, 14), Vector3i(17, 5, 17), 1, 4, PackedByteArray(), 1.0) 
-	ve.set_voxel_multitexture(Vector3i(9, 5, 16), 3, 4, 5, 6, 7, 8, 1.0)
+	var multi_textures = PackedByteArray([2, 3, 4, 5, 6, 7]) 
+	ve.fill_voxel_region(Vector3i(14, 2, 14), Vector3i(17, 5, 17), 2, 4, multi_textures, 1.0) 
 	ve.fill_voxel_region(Vector3i(20, 2, 20), Vector3i(21, 5, 21), 1, 12, PackedByteArray(), 1.0)
 	ve.sphere_singletexture(Vector3i(14, 12, 14), 8, 5, 0.9)
 	

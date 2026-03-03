@@ -22,6 +22,8 @@ public:
     static int WORLD_SIZE_Y;
     static int WORLD_SIZE_Z;
     static const int CHUNK_SIZE = 16;
+    
+    bool debug_enabled;
 
 private:
     // Use the custom hasher for std::unordered_map
@@ -54,26 +56,27 @@ public:
     void InitVE(int size_x, int size_y, int size_z, 
         godot::Ref<godot::Texture2D> tex, godot::Node3D* parentnode, godot::Camera3D* cameranode);
     void set_parentnode(Node3D* node);
+    void set_debug_enabled(bool enabled) { debug_enabled = enabled; }
+    bool get_debug_enabled() const { return debug_enabled; }
     void update_world();
     void refresh_world();
     //void set_voxel(const godot::Vector3i& global_pos, Voxel* voxel);
-    void set_voxel_singletexture(const godot::Vector3i& global_pos, uint8_t textureid,float density = 0.0f);
+    void set_voxel_singletexture(const godot::Vector3i& global_pos, uint8_t textureid);
     void set_voxel_multitexture(const godot::Vector3i& global_pos, 
-    uint8_t right, uint8_t left, uint8_t up, uint8_t down, uint8_t forward, uint8_t back, float density = 0.0f);
-    void sphere_singletexture(const godot::Vector3i& global_pos, uint8_t textureid, int radius, float density = 0.0f);
+    uint8_t right, uint8_t left, uint8_t up, uint8_t down, uint8_t forward, uint8_t back);
+    void sphere_singletexture(const godot::Vector3i& global_pos, uint8_t textureid, int radius);
     void fill_voxel_region(const godot::Vector3i& start, const godot::Vector3i& end, int voxel_type, 
-        uint8_t texture_id, const godot::PackedByteArray& multi_texture_ids = godot::PackedByteArray(), float density = 0.0f);
+        uint8_t texture_id, const godot::PackedByteArray& multi_texture_ids = godot::PackedByteArray());
     void delete_voxel(const godot::Vector3i& global_pos);
     Voxel* get_voxel(const godot::Vector3i& global_pos) const;
     int get_voxel_type(const godot::Vector3i& global_pos) const;
     uint8_t get_voxel_texture(const godot::Vector3i& global_pos, int nr) const;
     godot::Ref<godot::Texture2D> get_tilemap() const;
-
     godot::Vector3i identify_voxel() const;
 
-    void set_mesh_mode(int mode);
-    int get_mesh_mode() const;
-    float get_voxel_density(const godot::Vector3i& global_pos) const;
+    //void set_mesh_mode(int mode);
+    //int get_mesh_mode() const;
+    //float get_voxel_density(const godot::Vector3i& global_pos) const;
 };
 
 #endif // VOXEL_ENGINE_HPP

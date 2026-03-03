@@ -11,7 +11,7 @@ int VoxelEngine::WORLD_SIZE_Y = 0;
 int VoxelEngine::WORLD_SIZE_Z = 0;
 
 
-VoxelEngine::VoxelEngine() : parent(nullptr), mesh_mode(MESH_CUBE) {}
+VoxelEngine::VoxelEngine() : parent(nullptr), mesh_mode(MESH_CUBE), debug_enabled(true) {}
 
 
 VoxelEngine::~VoxelEngine() {
@@ -29,7 +29,7 @@ void VoxelEngine::InitVE(int size_x, int size_y, int size_z,
     WORLD_SIZE_Z = size_z;
     tilemap = tex;
 
-    UtilityFunctions::print("VoxelEngine ready - tilemap:", tilemap);
+    if (debug_enabled) UtilityFunctions::print("VoxelEngine ready - tilemap:", tilemap);
 
     int chunks_x = (WORLD_SIZE_X + CHUNK_SIZE - 1) / CHUNK_SIZE;
     int chunks_y = (WORLD_SIZE_Y + CHUNK_SIZE - 1) / CHUNK_SIZE;
@@ -41,7 +41,7 @@ void VoxelEngine::InitVE(int size_x, int size_y, int size_z,
     camera = memnew(Camera3D);
     parent = parentnode;
     camera = cameranode;
-    UtilityFunctions::print("parent:", parent, " camera:", camera);
+    if (debug_enabled) UtilityFunctions::print("parent:", parent, " camera:", camera);
 }
 
 
@@ -66,6 +66,7 @@ void VoxelEngine::refresh_world() {
     }
 }
 
+/*
 void VoxelEngine::set_mesh_mode(int mode) {
     mesh_mode = mode;
     //refresh_world();
@@ -74,11 +75,11 @@ void VoxelEngine::set_mesh_mode(int mode) {
 int VoxelEngine::get_mesh_mode() const {
     return mesh_mode;
 }
+*/
 
-
-void VoxelEngine::set_voxel_singletexture(const Vector3i& global_pos, uint8_t textureid, float density) {
+void VoxelEngine::set_voxel_singletexture(const Vector3i& global_pos, uint8_t textureid) {
     
-    Voxel* voxel = new SingleTextureVoxel(textureid, density);
+    Voxel* voxel = new SingleTextureVoxel(textureid);
     
     if (!is_in_world(global_pos)) {
         delete voxel;
@@ -118,7 +119,7 @@ void VoxelEngine::set_voxel_singletexture(const Vector3i& global_pos, uint8_t te
     chunks[index]->set_voxel(local_pos, voxel);
 }
 
-void VoxelEngine::sphere_singletexture(const godot::Vector3i& global_pos, uint8_t textureid, int radius, float density){
+void VoxelEngine::sphere_singletexture(const godot::Vector3i& global_pos, uint8_t textureid, int radius){
     if (!is_in_world(global_pos)) 
     {
         return;
@@ -135,7 +136,7 @@ void VoxelEngine::sphere_singletexture(const godot::Vector3i& global_pos, uint8_
                     (y - global_pos.y) * (y - global_pos.y) +
                     (z - global_pos.z) * (z - global_pos.z)) <= r * r) 
                 {
-                    set_voxel_singletexture(Vector3i(x, y, z), textureid, density);
+                    set_voxel_singletexture(Vector3i(x, y, z), textureid);
                     //UtilityFunctions::print("set voxel");
                 }
             }
@@ -146,9 +147,9 @@ void VoxelEngine::sphere_singletexture(const godot::Vector3i& global_pos, uint8_
 
 
 void VoxelEngine::set_voxel_multitexture(const Vector3i& global_pos, 
-    uint8_t right, uint8_t left, uint8_t up, uint8_t down, uint8_t forward, uint8_t back, float density) {
+    uint8_t right, uint8_t left, uint8_t up, uint8_t down, uint8_t forward, uint8_t back) {
     
-    Voxel* voxel = new MultiTextureVoxel(right, left, up, down, forward, back, density);
+    Voxel* voxel = new MultiTextureVoxel(right, left, up, down, forward, back);
     
     if (!is_in_world(global_pos)) {
         delete voxel;
@@ -286,9 +287,14 @@ int VoxelEngine::get_voxel_type(const Vector3i& global_pos) const {
 
     size_t index = get_chunk_index(chunk_pos);
     if (index < chunks.size() && chunks[index]) {
-        
-        if (SingleTextureVoxel* simple_voxel = dynamic_cast<SingleTextureVoxel*>(chunks[index]->get_voxel(local_pos))) return 1;
-        if (MultiTextureVoxel* simple_voxel = dynamic_cast<MultiTextureVoxel*>(chunks[index]->get_voxel(local_pos))) return 2;
+        Voxel* voxel = chunks[index]->get_voxel(local_pos);
+        int type = 0;
+        if (voxel) {
+            if (dynamic_cast<SingleTextureVoxel*>(voxel)) type = 1;
+            else if (dynamic_cast<MultiTextureVoxel*>(voxel)) type = 2;
+            delete voxel;
+        }
+        return type;
     }
     return 0;
 }
@@ -316,18 +322,19 @@ uint8_t VoxelEngine::get_voxel_texture(const godot::Vector3i& global_pos, int nr
 
     size_t index = get_chunk_index(chunk_pos);
     if (index < chunks.size() && chunks[index]) {
-
-        if (SingleTextureVoxel* simple_voxel = dynamic_cast<SingleTextureVoxel*>(chunks[index]->get_voxel(local_pos))){
-            return chunks[index]->get_voxel(local_pos)->get_texture_id(0);
+        Voxel* voxel = chunks[index]->get_voxel(local_pos);
+        uint8_t texture = 0;
+        if (voxel) {
+            texture = voxel->get_texture_id(nr);
+            delete voxel;
         }
-        if (MultiTextureVoxel* simple_voxel = dynamic_cast<MultiTextureVoxel*>(chunks[index]->get_voxel(local_pos))){
-            return chunks[index]->get_voxel(local_pos)->get_texture_id(nr);
-        }
+        return texture;
     }
 
     return 0;
 }
 
+/*
 float VoxelEngine::get_voxel_density(const godot::Vector3i& global_pos) const {
     if (!is_in_world(global_pos)) {
         return 0;
@@ -350,13 +357,17 @@ float VoxelEngine::get_voxel_density(const godot::Vector3i& global_pos) const {
 
     size_t index = get_chunk_index(chunk_pos);
     if (index < chunks.size() && chunks[index]) {
-        
-       if (SingleTextureVoxel* simple_voxel = dynamic_cast<SingleTextureVoxel*>(chunks[index]->get_voxel(local_pos))) return chunks[index]->get_voxel(local_pos)->get_density();
-       if (MultiTextureVoxel* simple_voxel = dynamic_cast<MultiTextureVoxel*>(chunks[index]->get_voxel(local_pos))) return chunks[index]->get_voxel(local_pos)->get_density();
+        Voxel* voxel = chunks[index]->get_voxel(local_pos);
+        float density = 0;
+        if (voxel) {
+            density = voxel->get_density();
+            delete voxel;
+        }
+        return density;
     }
     return 0;
 }
-
+*/
 
 bool VoxelEngine::is_in_world(const Vector3i& pos) const {
     return pos.x >= 0 && pos.x < WORLD_SIZE_X &&
@@ -429,13 +440,30 @@ Ref<Texture2D> VoxelEngine::get_tilemap() const {
 }
 
 godot::Vector3i VoxelEngine::identify_voxel() const {
-    if(!camera) return Vector3i(-1, -1, -1);
+    if (debug_enabled) UtilityFunctions::print("identify_voxel: Start");
 
-    // Ray Setup
+    if(!camera) {
+        if (debug_enabled) UtilityFunctions::print("identify_voxel: No camera - returning error");
+        return Vector3i(-1, -1, -1);
+    }
+
+    if (debug_enabled) UtilityFunctions::print("identify_voxel: Camera OK");
+    
     godot::Viewport* viewport = camera->get_viewport();
+    if(!viewport) {
+        if (debug_enabled) UtilityFunctions::print("identify_voxel: No viewport");
+        return Vector3i(-1, -1, -1);
+    }
+    
+    if (debug_enabled) UtilityFunctions::print("identify_voxel: Viewport OK");
+    
     godot::Vector2 mouse_pos = viewport->get_mouse_position();
+    if (debug_enabled) UtilityFunctions::print("identify_voxel: mouse_pos: ", mouse_pos);
+    
     godot::Vector3 ray_origin = camera->project_ray_origin(mouse_pos);
     godot::Vector3 ray_normal = camera->project_ray_normal(mouse_pos);
+
+    if (debug_enabled) UtilityFunctions::print("identify_voxel: Ray OK - origin: ", ray_origin, " normal: ", ray_normal);
 
     // Ray Offset
     ray_origin += ray_normal * 0.05f;
@@ -446,6 +474,8 @@ godot::Vector3i VoxelEngine::identify_voxel() const {
         static_cast<int>(std::floor(ray_origin.y)),
         static_cast<int>(std::floor(ray_origin.z))
     );
+
+    if (debug_enabled) UtilityFunctions::print("identify_voxel: initial voxel_pos: ", voxel_pos);
 
     // Step Direction
     godot::Vector3i step(
@@ -468,21 +498,31 @@ godot::Vector3i VoxelEngine::identify_voxel() const {
         (ray_normal.z != 0) ? ((voxel_pos.z + (ray_normal.z > 0 ? 1 : 0)) - ray_origin.z) / ray_normal.z : FLT_MAX
     );
 
+    if (debug_enabled) UtilityFunctions::print("identify_voxel: Starting raycast loop");
+
     constexpr int MAX_STEPS = 1000;
     for(int i = 0; i < MAX_STEPS; ++i) {
-        if(!is_in_world(voxel_pos)) break;
+        if(!is_in_world(voxel_pos)) {
+            if (debug_enabled) UtilityFunctions::print("identify_voxel: out of world at step ", i);
+            break;
+        }
 
+        if (debug_enabled) UtilityFunctions::print("identify_voxel: calling get_voxel at ", voxel_pos);
         Voxel* voxel = get_voxel(voxel_pos);
-        if(voxel && voxel->is_active()) {
-            // Backtrack check
-            godot::Vector3i prev_pos = voxel_pos - step;
-            if(is_in_world(prev_pos)) {
-                Voxel* prev_voxel = get_voxel(prev_pos);
-                if(prev_voxel && prev_voxel->is_active()) {
-                    return voxel_pos-step;
-                }
+        if (debug_enabled) UtilityFunctions::print("identify_voxel: get_voxel returned");
+        
+        if(voxel != nullptr) {
+            if (debug_enabled) UtilityFunctions::print("identify_voxel: voxel not null, checking is_active");
+            if(voxel->is_active()) {
+                if (debug_enabled) UtilityFunctions::print("identify_voxel: voxel is active, returning WITHOUT delete");
+                godot::Vector3i result = voxel_pos;
+                // delete voxel; // Removed for debugging
+                return result;
             }
-            return voxel_pos;
+            if (debug_enabled) UtilityFunctions::print("identify_voxel: deleting voxel");
+            delete voxel;
+        } else {
+            if (debug_enabled) UtilityFunctions::print("identify_voxel: voxel is null");
         }
 
         // Traversal logic
@@ -499,12 +539,14 @@ godot::Vector3i VoxelEngine::identify_voxel() const {
             t_max.z += t_delta.z;
         }
     }
+    
+    if (debug_enabled) UtilityFunctions::print("identify_voxel: no voxel found, returning ", voxel_pos);
     return voxel_pos;
 }
 
 
 void VoxelEngine::fill_voxel_region(const godot::Vector3i& start, const godot::Vector3i& end, 
-    int voxel_type, uint8_t texture_id, const godot::PackedByteArray& multi_texture_ids, float density) {
+    int voxel_type, uint8_t texture_id, const godot::PackedByteArray& multi_texture_ids) {
     if (voxel_type != 1 && voxel_type != 2) {
         UtilityFunctions::printerr("FillVoxelRegion: Invalid voxel_type! Must be 1 (SingleTextureVoxel) or 2 (MultiTextureVoxel).");
         return;
@@ -572,11 +614,11 @@ void VoxelEngine::fill_voxel_region(const godot::Vector3i& start, const godot::V
                 for (int z = local_start.z; z <= local_end.z; ++z) {
                     Voxel* voxel = nullptr;
                     if (voxel_type == 1) {
-                        voxel = new SingleTextureVoxel(texture_id, density);
+                        voxel = new SingleTextureVoxel(texture_id);
                     } else if (voxel_type == 2) {
                         voxel = new MultiTextureVoxel(
                             multi_texture_ids[0], multi_texture_ids[1], multi_texture_ids[2],
-                            multi_texture_ids[3], multi_texture_ids[4], multi_texture_ids[5], density
+                            multi_texture_ids[3], multi_texture_ids[4], multi_texture_ids[5]
                         );
                     }
                     chunks[chunk_index]->set_voxel(Vector3i(x, y, z), voxel);
@@ -626,11 +668,11 @@ void VoxelEngine::fill_voxel_region(const godot::Vector3i& start, const godot::V
                             for (int z = local_start.z; z <= local_end.z; ++z) {
                                 Voxel* voxel = nullptr;
                                 if (voxel_type == 1) {
-                                    voxel = new SingleTextureVoxel(texture_id, density);
+                                    voxel = new SingleTextureVoxel(texture_id);
                                 } else if (voxel_type == 2) {
                                     voxel = new MultiTextureVoxel(
                                         multi_texture_ids[0], multi_texture_ids[1], multi_texture_ids[2],
-                                        multi_texture_ids[3], multi_texture_ids[4], multi_texture_ids[5], density
+                                        multi_texture_ids[3], multi_texture_ids[4], multi_texture_ids[5]
                                     );
                                 }
                                 chunks[chunk_index]->set_voxel(Vector3i(x, y, z), voxel);
@@ -649,10 +691,10 @@ void VoxelEngine::fill_voxel_region(const godot::Vector3i& start, const godot::V
 void VoxelEngine::_bind_methods() {
     // Bind methods if needed
     ClassDB::bind_method(D_METHOD("InitVE", "size_x", "size_y", "size_z", "tex", "parentnode"), &VoxelEngine::InitVE);
-    ClassDB::bind_method(D_METHOD("set_voxel_singletexture", "global_pos", "textureid", "density"), 
+    ClassDB::bind_method(D_METHOD("set_voxel_singletexture", "global_pos", "textureid"), 
         &VoxelEngine::set_voxel_singletexture);
     ClassDB::bind_method(D_METHOD("set_voxel_multitexture", "global_pos", 
-        "right", "left", "up", "down", "forward", "back", "density"), 
+        "right", "left", "up", "down", "forward", "back"), 
         &VoxelEngine::set_voxel_multitexture);
     ClassDB::bind_method(D_METHOD("update_world"), &VoxelEngine::update_world);
     ClassDB::bind_method(D_METHOD("refresh_world"), &VoxelEngine::refresh_world);
@@ -660,11 +702,12 @@ void VoxelEngine::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_voxel_type", "global_pos"), &VoxelEngine::get_voxel_type);
     ClassDB::bind_method(D_METHOD("get_voxel_texture", "global_pos", "nr"), &VoxelEngine::get_voxel_texture);
     ClassDB::bind_method(D_METHOD("identify_voxel"), &VoxelEngine::identify_voxel);
-    ClassDB::bind_method(D_METHOD("fill_voxel_region", "start", "end", "voxel_type", "texture_id", "multi_texture_ids", "density"), 
+    ClassDB::bind_method(D_METHOD("fill_voxel_region", "start", "end", "voxel_type", "texture_id", "multi_texture_ids"), 
     &VoxelEngine::fill_voxel_region, DEFVAL(godot::PackedByteArray()));
-    ClassDB::bind_method(D_METHOD("set_mesh_mode", "mode"), &VoxelEngine::set_mesh_mode);
-    ClassDB::bind_method(D_METHOD("get_mesh_mode"), &VoxelEngine::get_mesh_mode);
-    ClassDB::bind_method(D_METHOD("sphere_singletexture", "global_pos", "textureid", "radius", "density"), &VoxelEngine::sphere_singletexture);
-    //ClassDB::add_property("VoxelEngine", PropertyInfo(Variant::INT, "mesh_mode", PROPERTY_HINT_ENUM, "Cube:0,Marching Cubes:1"), "set_mesh_mode", "get_mesh_mode");
+    //ClassDB::bind_method(D_METHOD("set_mesh_mode", "mode"), &VoxelEngine::set_mesh_mode);
+    //ClassDB::bind_method(D_METHOD("get_mesh_mode"), &VoxelEngine::get_mesh_mode);
+    ClassDB::bind_method(D_METHOD("sphere_singletexture", "global_pos", "textureid", "radius"), &VoxelEngine::sphere_singletexture);
+    ClassDB::bind_method(D_METHOD("set_debug_enabled", "enabled"), &VoxelEngine::set_debug_enabled);
+    ClassDB::bind_method(D_METHOD("get_debug_enabled"), &VoxelEngine::get_debug_enabled);
 }
 

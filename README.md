@@ -1,30 +1,22 @@
 # Easy-Voxels-GDExtension
 
 an easy voxelengine c++ GDExtension for godot 4.4.1. nothing special but functional.    
-it uses 16x16x16 chunks and face culling. there are voxels with a single texture or multitexture voxels.   
-there are 2 modes. mode 0 for cubic voxels, or mode 1 for marchingcube voxels.    
+it uses 16x16x16 chunks and face culling. there are voxels with a single texture or multitexture voxels.    
 the tileset is 32x32 + 1 pixel padding (leave 1 pixel seam around every texture) = 34x34.    
 the gdextension creates a new Node VoxelEngine.    
 for build with scons copy godot-cpp version 4.4.1 into directory godot-cpp    
 for use of the binaries put into bin-directory.     
-
-in the demo: if you press SPACE, the mode changes from cubic to marchingcubes and viceversa,    
+  
 if you press ESC the program exits.    
       
 picture from demo, mode 0 = cubic voxel:        
 ![Pic1](gdexample/pic1.jpg)
-
-first pic mode 1 = marchingcubes voxel(still with some bugs):        
-![Pic1](gdexample/marchingcubes.jpg)
 
 
 you can use it for example in gdscript:    
 ```
   # instantiate class VoxelEngine
   var ve = VoxelEngine.new()
-
-  # set mode cubic
-  ve.set_mesh_mode(0)
 	
   # initialize VoxelEngine sizex, sizey, sizez, tilemap with padding, parentnode, camera3D
   ve.InitVE(64, 32, 64, ResourceLoader.load("res://resources/textures/tilemap32.png"), self, get_node("Camera3D"))
@@ -59,14 +51,14 @@ voxel_engine.fill_voxel_region(start, end, 1, 1, PackedByteArray(), 1.0) # with 
 var multi_textures = PackedByteArray([1, 2, 3, 4, 5, 6]) # textures right, left, up, down, forward, back
 voxel_engine.fill_voxel_region(start, end, 2, 0, multi_textures, 1.0)
 ```
-set_mesh_mode "mode" (0 for cubic, 1 for marchingcubes)    
-get_mesh_mode    
+  
 
 # changes:
 v0.2: changed identify_voxel in voxelengine.cpp and added a test in demo/src/node3d.gd    
 v0.3: changed voxels from "normal" array to std::unordered_map, new function fill_voxel_region     
 v0.4: added new mode for marchingcubes voxels. set with set_mesh_mode(1). still some bugs...    
 v0.4.1: in mode1: texture16-bug is gone. texture-seams half gone...    
-v0.4.2: new command refresh_world(), sphere_singletexture    
+v0.4.2: new command refresh_world(), sphere_singletexture   
+v0.4.3: removed marchingcubesmode    
 
 

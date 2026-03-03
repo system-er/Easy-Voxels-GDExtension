@@ -11,6 +11,6 @@ config_version=5
 [application]
 
 config/name="demo"
-run/main_scene="uid://c6xcnb815k40s"
-config/features=PackedStringArray("4.4", "Forward Plus")
+run/main_scene="uid://bideh6auor21c"
+config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"

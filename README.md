@@ -8,7 +8,7 @@ for build with scons copy godot-cpp version 4.5 into directory godot-cpp
 for use of the binaries put into bin-directory.     
 
       
-picture from demo, mode 0 = cubic voxel:        
+picture from test:        
 ![Pic1](gdexample/pic1.jpg)
 
 

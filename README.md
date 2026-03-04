@@ -56,7 +56,6 @@ voxel_engine.fill_voxel_region(start, end, 2, 0, multi_textures)
 v0.2: changed identify_voxel in voxelengine.cpp and added a test in demo/src/node3d.gd    
 v0.3: changed voxels from "normal" array to std::unordered_map, new function fill_voxel_region     
 v0.4.1: in mode1: texture16-bug is gone. texture-seams half gone...    
-v0.4.2: new command refresh_world(), sphere_singletexture   
-v0.4.3: removed marchingcubesmode    
+v0.4.2: new command refresh_world(), sphere_singletexture    
 
 

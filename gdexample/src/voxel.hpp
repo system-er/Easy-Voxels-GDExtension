@@ -9,6 +9,8 @@ public:
     virtual ~Voxel() = default;
     virtual bool is_active() const = 0;
     virtual uint8_t get_texture_id(int nr) const { return 0; }
+    // Create a polymorphic copy of the voxel
+    virtual Voxel* clone() const = 0;
 };
 
 class SingleTextureVoxel : public Voxel {
@@ -18,6 +20,7 @@ public:
     SingleTextureVoxel(uint8_t texture_id = 0);
     bool is_active() const override;
     uint8_t get_texture_id(int nr) const override { return texture_id; }
+    Voxel* clone() const override { return memnew(SingleTextureVoxel(texture_id)); }
 };
 
 class MultiTextureVoxel : public Voxel {
@@ -28,6 +31,7 @@ public:
     ~MultiTextureVoxel();
     bool is_active() const override;
     uint8_t get_texture_id(int nr) const override { return texture_ids[nr]; }
+    Voxel* clone() const override { return memnew(MultiTextureVoxel(texture_ids[0], texture_ids[1], texture_ids[2], texture_ids[3], texture_ids[4], texture_ids[5])); }
 };
 
 #endif // VOXEL_HPP

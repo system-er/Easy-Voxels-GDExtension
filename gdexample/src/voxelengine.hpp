@@ -5,6 +5,7 @@
 #include <godot_cpp/classes/texture2d.hpp>
 #include <godot_cpp/classes/camera3d.hpp>
 #include "chunk.hpp"
+#include <vector>
 #include <unordered_map>
 
 
@@ -74,9 +75,7 @@ public:
     godot::Ref<godot::Texture2D> get_tilemap() const;
     godot::Vector3i identify_voxel() const;
 
-    //void set_mesh_mode(int mode);
-    //int get_mesh_mode() const;
-    //float get_voxel_density(const godot::Vector3i& global_pos) const;
+
 };
 
 #endif // VOXEL_ENGINE_HPP

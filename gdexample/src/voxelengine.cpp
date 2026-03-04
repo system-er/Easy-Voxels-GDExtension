@@ -37,8 +37,7 @@ void VoxelEngine::InitVE(int size_x, int size_y, int size_z,
 
     chunks.resize(chunks_x * chunks_y * chunks_z, nullptr);
 
-    parent = memnew(Node3D);
-    camera = memnew(Camera3D);
+    // Do not create new objects here; use the provided ones to avoid leaks
     parent = parentnode;
     camera = cameranode;
     if (debug_enabled) UtilityFunctions::print("parent:", parent, " camera:", camera);
@@ -66,16 +65,6 @@ void VoxelEngine::refresh_world() {
     }
 }
 
-/*
-void VoxelEngine::set_mesh_mode(int mode) {
-    mesh_mode = mode;
-    //refresh_world();
-}
-
-int VoxelEngine::get_mesh_mode() const {
-    return mesh_mode;
-}
-*/
 
 void VoxelEngine::set_voxel_singletexture(const Vector3i& global_pos, uint8_t textureid) {
     
@@ -334,40 +323,7 @@ uint8_t VoxelEngine::get_voxel_texture(const godot::Vector3i& global_pos, int nr
     return 0;
 }
 
-/*
-float VoxelEngine::get_voxel_density(const godot::Vector3i& global_pos) const {
-    if (!is_in_world(global_pos)) {
-        return 0;
-    }
 
-    Vector3i chunk_pos(
-        global_pos.x / CHUNK_SIZE,
-        global_pos.y / CHUNK_SIZE,
-        global_pos.z / CHUNK_SIZE
-    );
-    Vector3i local_pos(
-        global_pos.x % CHUNK_SIZE,
-        global_pos.y % CHUNK_SIZE,
-        global_pos.z % CHUNK_SIZE
-    );
-
-    if (local_pos.x < 0) local_pos.x += CHUNK_SIZE;
-    if (local_pos.y < 0) local_pos.y += CHUNK_SIZE;
-    if (local_pos.z < 0) local_pos.z += CHUNK_SIZE;
-
-    size_t index = get_chunk_index(chunk_pos);
-    if (index < chunks.size() && chunks[index]) {
-        Voxel* voxel = chunks[index]->get_voxel(local_pos);
-        float density = 0;
-        if (voxel) {
-            density = voxel->get_density();
-            delete voxel;
-        }
-        return density;
-    }
-    return 0;
-}
-*/
 
 bool VoxelEngine::is_in_world(const Vector3i& pos) const {
     return pos.x >= 0 && pos.x < WORLD_SIZE_X &&
@@ -516,7 +472,8 @@ godot::Vector3i VoxelEngine::identify_voxel() const {
             if(voxel->is_active()) {
                 if (debug_enabled) UtilityFunctions::print("identify_voxel: voxel is active, returning WITHOUT delete");
                 godot::Vector3i result = voxel_pos;
-                // delete voxel; // Removed for debugging
+                //delete voxel;
+                memdelete(voxel);
                 return result;
             }
             if (debug_enabled) UtilityFunctions::print("identify_voxel: deleting voxel");
@@ -704,8 +661,6 @@ void VoxelEngine::_bind_methods() {
     ClassDB::bind_method(D_METHOD("identify_voxel"), &VoxelEngine::identify_voxel);
     ClassDB::bind_method(D_METHOD("fill_voxel_region", "start", "end", "voxel_type", "texture_id", "multi_texture_ids"), 
     &VoxelEngine::fill_voxel_region, DEFVAL(godot::PackedByteArray()));
-    //ClassDB::bind_method(D_METHOD("set_mesh_mode", "mode"), &VoxelEngine::set_mesh_mode);
-    //ClassDB::bind_method(D_METHOD("get_mesh_mode"), &VoxelEngine::get_mesh_mode);
     ClassDB::bind_method(D_METHOD("sphere_singletexture", "global_pos", "textureid", "radius"), &VoxelEngine::sphere_singletexture);
     ClassDB::bind_method(D_METHOD("set_debug_enabled", "enabled"), &VoxelEngine::set_debug_enabled);
     ClassDB::bind_method(D_METHOD("get_debug_enabled"), &VoxelEngine::get_debug_enabled);

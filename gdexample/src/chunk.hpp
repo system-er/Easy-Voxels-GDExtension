@@ -5,6 +5,7 @@
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 #include <godot_cpp/classes/surface_tool.hpp>
 #include <godot_cpp/classes/standard_material3d.hpp>
+#include <unordered_map>
 #include "voxel.hpp"
 #include <vector>
 

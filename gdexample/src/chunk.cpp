@@ -94,8 +94,8 @@ Voxel* Chunk::get_voxel(const Vector3i& local_pos) const {
     }
     auto it = voxels.find(local_pos);
     if (it != voxels.end() && it->second) {
-        //UtilityFunctions::print("GetVoxel: Found voxel at ", local_pos);
-        return it->second;
+        // Return a clone to avoid transferring ownership of internal voxels
+        return it->second->clone();
     }
     //UtilityFunctions::print("GetVoxel: No voxel found, returning default");
     return new SingleTextureVoxel(0);
